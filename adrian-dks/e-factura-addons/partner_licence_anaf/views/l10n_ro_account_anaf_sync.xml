@@ -32,14 +32,14 @@
   > <!-- Aceastra structura trebuie stearsa sau reglata -->
             <field name="name">l10n.ro.account.anaf.sync Tree</field>
             <field name="model">l10n.ro.account.anaf.sync</field>
-            <field name="type">tree</field>
+            <field name="type">list</field>
                 <field name="inherit_id" ref="" />
 
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name" />
                     <field name="other_name" /> <!-- TODO de continuat -->
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -49,7 +49,7 @@
   > <!-- Aceastra structura trebuie stearsa sau reglata -->
             <field name="name">l10n.ro.account.anaf.sync Action</field>
             <field name="res_model">l10n.ro.account.anaf.sync</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem

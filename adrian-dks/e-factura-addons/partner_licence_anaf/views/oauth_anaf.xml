@@ -38,19 +38,19 @@
         <record id="partner_licence_anaf_oauth_tree" model="ir.ui.view">
             <field name="name">partner.licence.anaf_oauth Tree</field>
             <field name="model">partner.licence.anaf_oauth</field>
-            <field name="type">tree</field>
+            <field name="type">list</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name" />
                     <field name="client_id" />
-                </tree>
+                </list>
             </field>
         </record>
 
         <record id="partner_licence_anaf_oauth_action" model="ir.actions.act_window">
             <field name="name">Anaf Conf OAuth</field>
             <field name="res_model">partner.licence.anaf_oauth</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem
