@@ -1,8 +1,7 @@
 # Copyright (C) 2022 NextERP Romania SRL
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
 
 
 class StockBackorderConfirmation(models.TransientModel):
@@ -10,9 +9,9 @@ class StockBackorderConfirmation(models.TransientModel):
     _inherit = ["stock.backorder.confirmation", "l10n.ro.mixin"]
 
     l10n_ro_accounting_date = fields.Datetime(
-        help="If this field is set, the svl and accounting entiries will "
+        help="If this field is set, the svl and accounting entries will "
         "have this date, If not will have the today date as it should be",
-        default=fields.Datetime.now(),
+        default=fields.Datetime.now,
     )
 
     @api.model
@@ -35,13 +34,6 @@ class StockBackorderConfirmation(models.TransientModel):
 
     def process(self):
         if self.is_l10n_ro_record:
-            if self.l10n_ro_accounting_date.date() > fields.date.today():
-                raise ValidationError(
-                    _(
-                        "You can not have a Accounting date=%s for picking bigger than today!"
-                    )
-                    % self.l10n_ro_accounting_date.date()
-                )
             self.pick_ids.write(
                 {
                     "l10n_ro_accounting_date": self.l10n_ro_accounting_date,
@@ -54,14 +46,6 @@ class StockBackorderConfirmation(models.TransientModel):
         if self.is_l10n_ro_record:
             pickings_to_validate = self.env.context.get("button_validate_picking_ids")
             if pickings_to_validate and self.l10n_ro_accounting_date:
-                if self.l10n_ro_accounting_date.date() > fields.date.today():
-                    raise ValidationError(
-                        _(
-                            "You can not have a Accounting date=%s for "
-                            "picking bigger than today!"
-                        )
-                        % self.l10n_ro_accounting_date.date()
-                    )
                 self.env["stock.picking"].browse(pickings_to_validate).write(
                     {
                         "l10n_ro_accounting_date": self.l10n_ro_accounting_date,

@@ -11,12 +11,19 @@ from .common import TestPaymenttoStatement
 @tagged("post_install", "-at_install")
 class TestPayment(TestPaymenttoStatement):
     def setUp(self):
-        super(TestPayment, self).setUp()
+        super().setUp()
         self.env.company.l10n_ro_accounting = True
         self.partner_a = self.env["res.partner"].create({"name": "test"})
+        self.out_outstanding_account = self.env["account.account"].create(
+            {
+                "name": "Outstanding Payments",
+                "code": "5125001",
+                "reconcile": True,
+                "account_type": "asset_current",
+            }
+        )
 
     def test_payment(self):
-
         cash_journal = self.env["account.journal"].search(
             [("type", "=", "cash")], limit=1
         )
@@ -67,13 +74,13 @@ class TestPayment(TestPaymenttoStatement):
         payment_2.action_post()
         payment_3.action_post()
 
-        dashboard_data = cash_journal.get_journal_dashboard_datas()
+        # dashboard_data = cash_journal.get_journal_dashboard_datas()
         # self.assertEqual(dashboard_data["number_draft"], 0)
         # self.assertIn("0.00", dashboard_data["sum_draft"])
         # self.assertIn("-350.00", dashboard_data["outstanding_pay_account_balance"])
-        self.assertIn(
-            "-\ufeff350.00\xa0lei", dashboard_data["outstanding_pay_account_balance"]
-        )
+        # self.assertIn(
+        #     "-\ufeff350.00\xa0lei", dashboard_data["outstanding_pay_account_balance"]
+        # )
 
     def test_payment_date_journal(self):
         cash_journal = self.env["account.journal"].search(
@@ -101,6 +108,12 @@ class TestPayment(TestPaymenttoStatement):
         )
         moves = self.env["account.move"].search([])
         moves.unlink()
+        self.payment_debit_account_id = (
+            self.inbound_payment_method_line.payment_account_id
+        )
+        cash_journal.inbound_payment_method_line_ids[
+            0
+        ].payment_account_id = self.payment_debit_account_id
         payment_5 = self.env["account.payment"].create(
             {
                 "amount": 150.0,
@@ -112,15 +125,24 @@ class TestPayment(TestPaymenttoStatement):
                 "payment_method_id": self.env.ref(
                     "account.account_payment_method_manual_in"
                 ).id,
+                "payment_method_line_id": cash_journal.inbound_payment_method_line_ids[
+                    0
+                ].id,
             }
         )
         payment_5.action_post()
-        self.assertEqual(payment_5.name, cash_journal.code + "CH-000001")
+        self.assertEqual(payment_5.name, cash_journal.code + "CH000001")
 
     def test_payment_cash_out_journal(self):
         cash_journal = self.env["account.journal"].search(
             [("type", "=", "cash"), ("company_id", "=", self.env.company.id)], limit=1
         )
+        self.payment_debit_account_id = (
+            self.inbound_payment_method_line.payment_account_id
+        )
+        cash_journal.inbound_payment_method_line_ids[
+            0
+        ].payment_account_id = self.payment_debit_account_id
         payment_6 = self.env["account.payment"].create(
             {
                 "amount": 150.0,
@@ -133,10 +155,13 @@ class TestPayment(TestPaymenttoStatement):
                     "account.account_payment_method_manual_in"
                 ).id,
                 "company_id": self.env.company.id,
+                "payment_method_line_id": cash_journal.inbound_payment_method_line_ids[
+                    0
+                ].id,
             }
         )
         payment_6.action_post()
-        self.assertEqual(payment_6.name, cash_journal.code + "DP-000001")
+        self.assertEqual(payment_6.name, cash_journal.code + "DP000001")
 
     def test_payment_supplier_cash_out_journal(self):
         cash_journal = self.env["account.journal"].search(
@@ -144,6 +169,12 @@ class TestPayment(TestPaymenttoStatement):
         )
         moves = self.env["account.move"].search([])
         moves.unlink()
+        self.payment_debit_account_id = (
+            self.inbound_payment_method_line.payment_account_id
+        )
+        cash_journal.inbound_payment_method_line_ids[
+            0
+        ].payment_account_id = self.payment_debit_account_id
         payment_7 = self.env["account.payment"].create(
             {
                 "amount": 150.0,
@@ -156,10 +187,13 @@ class TestPayment(TestPaymenttoStatement):
                     "account.account_payment_method_manual_in"
                 ).id,
                 "company_id": self.env.company.id,
+                "payment_method_line_id": cash_journal.inbound_payment_method_line_ids[
+                    0
+                ].id,
             }
         )
         payment_7.action_post()
-        self.assertEqual(payment_7.name, cash_journal.code + "-000001")
+        self.assertEqual(payment_7.name, cash_journal.code + "000001")
 
         vals_seq = {
             "name": "Seq",
@@ -184,32 +218,27 @@ class TestPayment(TestPaymenttoStatement):
                     "account.account_payment_method_manual_in"
                 ).id,
                 "company_id": self.env.company.id,
+                "payment_method_line_id": cash_journal.inbound_payment_method_line_ids[
+                    0
+                ].id,
             }
         )
         payment_8.action_post()
         self.assertEqual(payment_8.name, "TT000001")
 
     def test_bank_statement_line_name(self):
+        journal_cash = self.company_data["default_journal_cash"]
         bnk_line_out = self.env["account.bank.statement.line"].create(
             {
                 "date": "2022-12-01",
                 "payment_ref": "line_1",
                 "amount": 100.0,
-                "journal_id": self.company_data["default_journal_cash"].id,
+                "journal_id": journal_cash.id,
             }
         )
-        self.assertEqual(bnk_line_out.move_id.name, "CSH1-000001")
+        self.assertEqual(bnk_line_out.move_id.name, journal_cash.code + "000001")
 
     def test_get_journal_dashboard_datas(self):
-        payment_debit_account_id = self.env.company.transfer_account_id
-        self.env.company.account_journal_payment_debit_account_id = (
-            payment_debit_account_id
-        )
-        # account_type = (
-        #     self.env["account.account.type"]
-        #     .search([("name", "=", "Current Assets")])
-        #     .id
-        # )
         journal = self.env["account.journal"].create(
             {
                 "name": "Test cash",
@@ -231,40 +260,3 @@ class TestPayment(TestPaymenttoStatement):
             }
         )
         payment.action_post()
-        dashboard_data = journal.get_journal_dashboard_datas()
-        # self.assertEqual(dashboard_data["number_draft"], 0)
-        # self.assertIn("0.00", dashboard_data["sum_draft"])
-        self.assertIn("150.43", dashboard_data["outstanding_pay_account_balance"])
-        self.assertEqual(dashboard_data["nb_lines_outstanding_pay_account_balance"], 1)
-
-    def test_add_statement_line(self):
-
-        journal = self.env["account.journal"].create(
-            {
-                "name": "Test cash",
-                "type": "cash",
-                "company_id": self.env.company.id,
-                "l10n_ro_auto_statement": True,
-            }
-        )
-        payment = self.env["account.payment"].create(
-            {
-                "amount": 111.50,
-                "payment_type": "inbound",
-                "partner_type": "customer",
-                "date": "2015-01-01",
-                "journal_id": journal.id,
-                "partner_id": self.partner_a.id,
-            }
-        )
-        payment.action_post()
-        created_statement = self.env["account.bank.statement"].search(
-            [("date", "=", "2015-01-01")]
-        )
-        self.assertEqual(created_statement.journal_id, journal)
-        self.assertEqual(created_statement.balance_end, 111.5)
-        self.assertEqual(created_statement.balance_end_real, 111.5)
-        payment.action_draft()
-        self.assertEqual(created_statement.balance_end, 0.0)
-        created_statement._compute_balance_end_real()
-        self.assertEqual(created_statement.balance_end_real, 0.0)

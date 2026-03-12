@@ -3,8 +3,8 @@
 {
     "name": "Romania - DVI",
     "license": "AGPL-3",
-    "version": "16.0.1.9.0",
-    "author": "Terrabit," "NextERP Romania," "Odoo Community Association (OCA)",
+    "version": "19.0.0.1.0",
+    "author": "Terrabit,NextERP Romania,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-romania",
     "category": "Localization",
     "depends": [

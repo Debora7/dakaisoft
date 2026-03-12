@@ -6,12 +6,15 @@ import logging
 import os
 import shutil
 from datetime import date, timedelta
+from io import BytesIO
+from unittest.mock import MagicMock, patch
+from zipfile import ZipFile
 
 import requests
 
 from odoo import tools
-from odoo.modules.module import get_module_resource
 from odoo.tests import tagged
+from odoo.tools.misc import file_path
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -23,13 +26,25 @@ class TestVATonpayment(AccountTestInvoicingCommon):
     """Run test for VAT on payment."""
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        ro_template_ref = "l10n_ro.ro_chart_template"
-        super().setUpClass(chart_template_ref=ro_template_ref)
+    @AccountTestInvoicingCommon.setup_country("ro")
+    def setUpClass(cls):
+        super().setUpClass()
         cls.env.company.l10n_ro_accounting = True
         cls.partner_anaf_model = cls.env["l10n.ro.res.partner.anaf"]
         cls.partner_model = cls.env["res.partner"]
         cls.invoice_model = cls.env["account.move"]
+
+        cls.fp_model = cls.env["account.fiscal.position"]
+        cls.fptvainc = cls.env.company.l10n_ro_property_vat_on_payment_position_id
+        if not cls.fptvainc:
+            cls.fptvainc = cls.fp_model.create(
+                {
+                    "name": "Sistem de colectare TVA",
+                    "company_id": cls.env.company.id,
+                }
+            )
+            cls.env.company.l10n_ro_property_vat_on_payment_position_id = cls.fptvainc
+
         cls.fbr_partner = cls.partner_model.create(
             {
                 "name": "FBR",
@@ -47,10 +62,16 @@ class TestVATonpayment(AccountTestInvoicingCommon):
         default_line_account = cls.env["account.account"].search(
             [
                 ("account_type", "=", "expense"),
-                ("deprecated", "=", False),
-                ("company_id", "=", cls.env.company.id),
+                ("company_ids", "in", cls.env.company.ids),
             ],
             limit=1,
+        )
+        cls.product = cls.env["product.product"].create(
+            {
+                "name": "Service",
+                "type": "service",
+                "list_price": 50.0,
+            }
         )
         cls.invoice_line = [
             (
@@ -58,7 +79,7 @@ class TestVATonpayment(AccountTestInvoicingCommon):
                 False,
                 {
                     "name": "Test description #1",
-                    "product_id": cls.env.ref("product.product_delivery_01").id,
+                    "product_id": cls.product.id,
                     "account_id": default_line_account.id,
                     "quantity": 1.0,
                     "price_unit": 100.0,
@@ -72,23 +93,36 @@ class TestVATonpayment(AccountTestInvoicingCommon):
                 "invoice_line_ids": cls.invoice_line,
             }
         )
-        cls.fp_model = cls.env["account.fiscal.position"]
-        cls.fptvainc = cls.fp_model.search(
-            [
-                ("name", "ilike", "Regim TVA la Incasare"),
-                ("company_id", "=", cls.env.company.id),
-            ]
-        )
+
         data_dir = tools.config["data_dir"]
         istoric_file = os.path.join(data_dir, "istoric.txt")
 
-        test_file = get_module_resource(
-            "l10n_ro_vat_on_payment", "tests", "istoric.txt"
-        )
+        test_file = file_path("l10n_ro_vat_on_payment/tests/istoric.txt")
         shutil.copyfile(test_file, istoric_file)
 
-    def test_download_data(self):
+    def _mock_anaf_request(self):
+        """Mock ANAF request to avoid external HTTP calls during tests."""
+        # Create a sample zip file content with the historic.txt file
+        test_file_path = file_path("l10n_ro_vat_on_payment/tests/istoric.txt")
+
+        # Create a BytesIO object to simulate zip file content
+        zip_buffer = BytesIO()
+        with ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.write(test_file_path, "istoric.txt")
+        zip_buffer.seek(0)
+
+        # Create mock response
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = zip_buffer.getvalue()
+
+        return mock_response
+
+    @patch("requests.get")
+    def test_download_data(self, mock_get):
         """Test download file and partner link."""
+        mock_get.return_value = self._mock_anaf_request()
+
         data_dir = tools.config["data_dir"]
         prev_day = date.today() - timedelta(1)
         try:
@@ -102,8 +136,8 @@ class TestVATonpayment(AccountTestInvoicingCommon):
             requests.exceptions.Timeout,
             requests.exceptions.HTTPError,
             requests.exceptions.ChunkedEncodingError,
-        ):
-            _logger.warning("Server ANAF is down.")
+        ) as e:
+            _logger.info(f"Server ANAF is down. Exception: {e}")
             return True
 
         try:
@@ -117,8 +151,8 @@ class TestVATonpayment(AccountTestInvoicingCommon):
             requests.exceptions.Timeout,
             requests.exceptions.HTTPError,
             requests.exceptions.ChunkedEncodingError,
-        ):
-            _logger.warning("Server ANAF is down.")
+        ) as e:
+            _logger.info(f"Server ANAF is down. Exception: {e}")
             return True
 
     def test_update_partner_data(self):
@@ -149,7 +183,7 @@ class TestVATonpayment(AccountTestInvoicingCommon):
             requests.exceptions.HTTPError,
             requests.exceptions.ChunkedEncodingError,
         ):
-            _logger.warning("Server ANAF is down.")
+            _logger.info("Server ANAF is down.")
             return True
 
     def test_invoice_fp(self):

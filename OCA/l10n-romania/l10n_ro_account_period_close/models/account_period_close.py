@@ -24,16 +24,10 @@ class AccountPeriodClosing(models.Model):
     journal_id = fields.Many2one("account.journal", string="Journal", required=True)
     account_ids = fields.Many2many("account.account", string="Accounts to close")
     debit_account_id = fields.Many2one(
-        "account.account",
-        "Closing account, debit",
-        required=True,
-        domain="[('company_id', '=', company_id)]",
+        "account.account", "Closing account, debit", required=True, check_company=True
     )
     credit_account_id = fields.Many2one(
-        "account.account",
-        "Closing account, credit",
-        required=True,
-        domain="[('company_id', '=', company_id)]",
+        "account.account", "Closing account, credit", required=True, check_company=True
     )
     move_ids = fields.One2many(
         "account.move",
@@ -44,13 +38,12 @@ class AccountPeriodClosing(models.Model):
 
     @api.onchange("company_id", "type")
     def _onchange_type(self):
-
         accounts = self.env["account.account"]
         if self.type == "income":
             accounts = self.env["account.account"].search(
                 [
                     ("account_type", "=", "income"),
-                    ("company_id", "=", self.company_id.id),
+                    ("company_ids", "in", self.company_id.ids),
                 ]
             )
 
@@ -58,7 +51,7 @@ class AccountPeriodClosing(models.Model):
             accounts = self.env["account.account"].search(
                 [
                     ("account_type", "=", "expense"),
-                    ("company_id", "=", self.company_id.id),
+                    ("company_ids", "in", self.company_id.ids),
                 ]
             )
 
@@ -77,7 +70,7 @@ class AccountPeriodClosing(models.Model):
             `debit`: total amount of debit,
             `balance`: total amount of balance,
         """
-        context = dict(self._context or {})
+        context = dict(self.env.context)
         domain = [("account_id", "in", accounts.ids), ("parent_state", "=", "posted")]
 
         date_field = "date"
@@ -98,31 +91,36 @@ class AccountPeriodClosing(models.Model):
         account_result = {}
         result = self.env["account.move.line"]._read_group(
             domain=domain,
-            fields=["account_id", "debit", "credit", "balance"],
             groupby=["account_id"],
+            aggregates=[
+                "account_id:recordset",
+                "debit:sum",
+                "credit:sum",
+                "balance:sum",
+            ],
         )
         for res in result:
             acc_vals = {
-                "debit": res["debit"],
-                "credit": res["credit"],
-                "balance": res["balance"],
+                "debit": res[2],
+                "credit": res[3],
+                "balance": res[4],
             }
-            account_result[res["account_id"][0]] = acc_vals
+            account_result[res[1]] = acc_vals
         account_res = []
         for account in accounts:
             res = {fn: 0.0 for fn in ["credit", "debit", "balance"]}
             currency = (
                 account.currency_id
                 if account.currency_id
-                else account.company_id.currency_id
+                else self.company_id.currency_id
             )
             res["id"] = account.id
             res["code"] = account.code
             res["name"] = account.name
-            if account.id in account_result:
-                res["debit"] = account_result[account.id].get("debit")
-                res["credit"] = account_result[account.id].get("credit")
-                res["balance"] = account_result[account.id].get("balance")
+            if account in account_result:
+                res["debit"] = account_result[account].get("debit")
+                res["credit"] = account_result[account].get("credit")
+                res["balance"] = account_result[account].get("balance")
             if display_account == "all":
                 account_res.append(res)
             if display_account == "not_zero" and not currency.is_zero(res["balance"]):
@@ -212,7 +210,7 @@ class AccountPeriodClosing(models.Model):
                 debit_acc = closing.debit_account_id
                 credit_acc = closing.credit_account_id
                 debit = credit = new_amount = 0.0
-                ctx1 = dict(self._context)
+                ctx1 = dict(self.env.context)
                 ctx1.update({"date_from": False, "date_to": date_to})
                 accounts = account_obj.browse(
                     [closing.debit_account_id.id, closing.credit_account_id.id]

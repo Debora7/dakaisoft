@@ -4,7 +4,7 @@
 
 import logging
 
-from odoo import _, fields, models
+from odoo import fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -21,18 +21,16 @@ class LandedCost(models.Model):
         "account.tax",
         string="Romania - DVI Tax",
         copy=False,
-        states={"done": [("readonly", True)]},
         help="VAT tax for products and customs cost",
     )
     l10n_ro_base_tax_value = fields.Float(
         "Romania - Base VAT amount",
-        states={"done": [("readonly", True)]},
         copy=False,
-        help="Base VAT amount, calculated from invoice base amount, customs and commission.",
+        help="Base VAT amount, calculated from invoice base amount,"
+        " customs and commission.",
     )
     l10n_ro_tax_value = fields.Float(
         "Romania - VAT amount paid at customs",
-        states={"done": [("readonly", True)]},
         copy=False,
         help="VAT amount, calculated from invoice base amount and customs.",
     )
@@ -48,7 +46,7 @@ class LandedCost(models.Model):
     )
 
     def button_validate(self):
-        res = super(LandedCost, self).button_validate()
+        res = super().button_validate()
         ro_recs = self.filtered(lambda rec: rec.is_l10n_ro_record)
         for cost in ro_recs.filtered(
             lambda c: c.l10n_ro_tax_value and c.l10n_ro_tax_id
@@ -58,8 +56,9 @@ class LandedCost(models.Model):
                 and not cost.l10n_ro_account_dvi_id.invoice_ids
             ):
                 raise UserError(
-                    _(
-                        "You cannot create a DVI landed cost without reference to an invoice."
+                    self.env._(
+                        "You cannot create a DVI landed cost without "
+                        "reference to an invoice."
                     )
                 )
             if not self.env.context.get("l10n_ro_revert_landed_cost"):
@@ -77,25 +76,40 @@ class LandedCost(models.Model):
                     cost.company_id._l10n_ro_get_or_create_custom_duty_product()
                 )
                 if not customs_duty_product:
-                    raise UserError(_("The product Custom Duty not found"))
+                    raise UserError(self.env._("The product Custom Duty not found"))
                 tax = cost.l10n_ro_tax_id
                 if cost.l10n_ro_dvi_bill_ids[0].move_type == "in_invoice":
                     tax_repartition_line = tax.invoice_repartition_line_ids.filtered(
                         lambda r: r.repartition_type == "tax"
                     )
+                    base_repartition_line = tax.invoice_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == "base"
+                    )
                 else:
                     tax_repartition_line = tax.refund_repartition_line_ids.filtered(
                         lambda r: r.repartition_type == "tax"
                     )
+                    base_repartition_line = tax.refund_repartition_line_ids.filtered(
+                        lambda r: r.repartition_type == "base"
+                    )
                 accounts_data = (
                     customs_duty_product.product_tmpl_id.get_product_accounts()
+                )
+                accounts_data["expense"] = (
+                    customs_duty_product.categ_id.property_account_expense_categ_id
                 )
                 tax_values = cost.l10n_ro_tax_id.compute_all(
                     cost.l10n_ro_base_tax_value
                 )
+                if self.env.company.account_cash_basis_base_account_id:
+                    base_account_id = (
+                        self.env.company.account_cash_basis_base_account_id.id
+                    )
+                else:
+                    base_account_id = (tax_values["taxes"][0]["account_id"],)
                 aml = [
                     {
-                        "name": _("VAT paid at customs"),
+                        "name": self.env._("VAT paid at customs"),
                         "debit": cost.l10n_ro_tax_value,
                         "credit": 0.0,
                         "account_id": tax_values["taxes"][0]["account_id"],
@@ -106,15 +120,45 @@ class LandedCost(models.Model):
                         "tax_base_amount": cost.l10n_ro_base_tax_value,
                     },
                     {
-                        "name": _("VAT paid at customs expense"),
+                        "name": self.env._("VAT paid at customs expense"),
                         "debit": 0.0,
                         "credit": cost.l10n_ro_tax_value,
                         "account_id": accounts_data["expense"].id,
                         "move_id": cost.account_move_id.id,
                     },
+                    {
+                        "name": self.env._("BASE paid at customs"),
+                        "debit": round(cost.l10n_ro_tax_value * 100 / tax.amount, 2),
+                        "credit": 0.0,
+                        "account_id": base_account_id,
+                        "move_id": cost.account_move_id.id,
+                        "tax_line_id": tax.id,
+                        # "tax_repartition_line_id": tax_repartition_line.id,
+                        "tax_tag_ids": [(6, 0, base_repartition_line.tag_ids.ids)],
+                        "tax_base_amount": cost.l10n_ro_base_tax_value,
+                    },
+                    {
+                        "name": self.env._("BASE paid at customs expense"),
+                        "debit": -round(cost.l10n_ro_tax_value * 100 / tax.amount, 2),
+                        "credit": 0.0,
+                        "amount_currency": -round(
+                            cost.l10n_ro_tax_value * 100 / tax.amount, 2
+                        ),
+                        "account_id": base_account_id,
+                        "move_id": cost.account_move_id.id,
+                    },
                 ]
+                if cost.account_move_id:
+                    cost.account_move_id.button_draft()
                 cost.account_move_id.write(
-                    {"line_ids": [(0, 0, aml[0]), (0, 0, aml[1])]}
+                    {
+                        "line_ids": [
+                            (0, 0, aml[0]),
+                            (0, 0, aml[1]),
+                            (0, 0, aml[2]),
+                            (0, 0, aml[3]),
+                        ]
+                    }
                 )
                 # self.env["account.move.line"].create(aml)
                 if cost.account_move_id and cost.account_move_id.state != "posted":
@@ -126,49 +170,18 @@ class AdjustmentLines(models.Model):
     _inherit = "stock.valuation.adjustment.lines"
 
     def _create_account_move_line(
-        self, move, credit_account_id, debit_account_id, qty_out, already_out_account_id
+        self, credit_account_id, debit_account_id, remaining_qty
     ):
         if not self.cost_id.is_l10n_ro_record:
             return super()._create_account_move_line(
-                move,
-                credit_account_id,
-                debit_account_id,
-                qty_out,
-                already_out_account_id,
+                credit_account_id, debit_account_id, remaining_qty
             )
 
-        if self._context.get("l10n_ro_revert_landed_cost"):
+        if self.env.context.get("l10n_ro_revert_landed_cost"):
             return []
         else:
             res = super()._create_account_move_line(
-                move,
-                credit_account_id,
-                debit_account_id,
-                qty_out,
-                already_out_account_id,
+                credit_account_id, debit_account_id, remaining_qty
             )
-            customs_duty_product = (
-                self.cost_id.company_id._l10n_ro_get_or_create_custom_duty_product()
-            )
-            if (
-                self.is_l10n_ro_record
-                and self.cost_line_id.product_id == customs_duty_product
-            ):
-                tax = customs_duty_product.supplier_taxes_id[0]
-                if self.cost_id.l10n_ro_dvi_bill_ids[0].move_type == "in_invoice":
-                    tax_repartition_line = tax.invoice_repartition_line_ids.filtered(
-                        lambda r: r.repartition_type == "base"
-                    )
-                else:
-                    tax_repartition_line = tax.refund_repartition_line_ids.filtered(
-                        lambda r: r.repartition_type == "base"
-                    )
-                # Add base tags to debit lines.
-                for line in res:
-                    line_dict = line[2]
-                    if line_dict.get("account_id") == debit_account_id:
-                        line_dict["tax_ids"] = tax.ids
-                        line_dict["tax_tag_ids"] = [
-                            (6, 0, tax_repartition_line["tag_ids"].ids)
-                        ]
+
             return res

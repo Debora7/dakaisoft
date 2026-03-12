@@ -8,25 +8,14 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 
-class AccountANAFSync(models.Model):
-    _inherit = "l10n.ro.account.anaf.sync"
+class ResConfigSettings(models.TransientModel):
+    _inherit = 'res.config.settings'
 
-    provider_id = fields.Many2one(
-        "l10n.ro.account.anaf.sync.provider", string="Provider", required=True
-    )
-    licence_status = fields.Selection(
-        [
-            ("draft", _("Draft")),
-            ("waiting_licence", _("Waiting Licence Confirm")),
-            ("confirmed_licence", _("Licence Confirmed")),
-            ("confirmed_token", _("Token Confirmed")),
-            ("blocked", _("Blocked")),
-        ],
-        string=_("Status"),
-        default="draft",
-    )
-    err_message = fields.Char(string="Error")
-    provider_licence = fields.Char(string="Provider Licence")
+    provider_id = fields.Many2one(related='company_id.provider_id', string="Provider", readonly=False)
+    licence_status = fields.Selection(related='company_id.licence_status', string=_("Status"), readonly=False)
+    err_message = fields.Char(related='company_id.err_message', string="Error", readonly=False)
+    provider_licence = fields.Char(related='company_id.provider_licence', string="Provider Licence", readonly=False)
+    code = fields.Char(related='company_id.code', string="Code", readonly=False)
 
     def get_anaf_licence(self):
         website = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
@@ -96,6 +85,12 @@ class AccountANAFSync(models.Model):
             raise UserError(_("Got error: %s.") % str(e))
         else:
             pass
+
+    def button_l10n_ro_edi_generate_token_auth(self):
+        self.ensure_one()
+        if self.company_id.provider_id:
+            return self.company_id.get_token_from_anaf_website()
+        return super().button_l10n_ro_edi_generate_token()
 
 
 class AccountANAFSyncProvider(models.Model):

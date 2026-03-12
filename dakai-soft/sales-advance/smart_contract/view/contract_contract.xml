@@ -126,8 +126,14 @@
                             </div>
                         </div>
                         <group>
-                            <group string="Client">
-                                <field name="partner_id" required="1" readonly="nr_document != False"/>
+                            <group string="Client" >
+                                <label for="partner_id" string="Customer" invisible="contract_type != 'sale'"/>
+                                <label for="partner_id" string="Supplier" invisible="contract_type != 'purchase'"/>
+
+                                <field name="partner_id"
+                                    nolabel="1"
+                                    required="1"
+                                    readonly="nr_document != False"/>
                                 <field name="legal_partner_id" required="1" context="{'default_parent_id': partner_id, 'default_type': 'contact'}" domain="[('parent_id', '=', partner_id),('is_company','=',False)]"/>
                             </group>
                             <group string="Data">
@@ -158,22 +164,6 @@
                             <group/>
                         </group>
                         <notebook>
-                            <page name="contract_details" string="Contract Details">
-                              <group>
-                                <group name="contract_serials" string="Serials">
-                                    <field name="company_id" readonly="nr_document != False"/>
-                                    <field name="regulation_id" domain="[('document_type','in',[document_type, False])]" invisible="document_type == 'act'" readonly="show_regulation == False" required="required_regulation == True"/>
-                                    <field name="can_change_regulation_adition_id" invisible="1"/>
-                                    <field name="regulation_adition_id" invisible="document_type =='act' or can_change_regulation_adition_id == False" domain="[('document_type','=','act')]"/>
-                                </group>
-                                <group name="contract_values" string="Values">
-                                  <field name="currency_id" readonly="nr_document != False"/>
-                                  <field name="valoare_fixa" readonly="nr_document != False"/>
-                                  <field name="valoare_fara_tva" readonly="nr_document != False"/>
-                                  <field name="valoare" readonly="nr_document != False"/>
-	                              </group>
-	                             </group>
-                            </page>
                             <page name="elements_page" string="Articles">
                             	<group>
                             		<group>
@@ -195,22 +185,27 @@
 
                             		</group>
                             	</group>
-                                <field name="elemente_ids" context="{'contract_id':id, 'type':'contract', 'element':None}" readonly="nr_document != False"/>
+                                <separator string="Articles" colspan="4" 
+                                    invisible="document_type == 'act' and child_ids == False or nr_document != False"/>
+                                <field name="elemente_ids" nolabel='1' context="{'contract_id':id, 'type':'contract', 'element':None}" readonly="nr_document != False"/>
                                 <p class="oe_grey oe_edit_only">
-                                    - $\{contract.field\} or $\{contract.object\}.method() global, contract fields method<br/>
-                                    - $\{attrelation.key\}.[field_name] global from contract.relations<br/>
-                                    - $\{localrelation\}.key local(this element)
+                                    <strong>Variabile disponibile:</strong><br/>
+                                    • <code>$\{contract.field\}</code> sau <code>$\{contract.object\}.method()</code> — câmpuri/metode globale ale contractului<br/>
+                                    • <code>$\{attrelation.key\}.[field_name]</code> — câmp global din <em>contract.relations</em><br/>
+                                    • <code>$\{localrelation\}.key</code> — relație locală (doar acest element)
                                 </p>
+                                <group>
+                                    <separator string="Contract Addendums" colspan="4" 
+                                        invisible="document_type == 'act' and child_ids == False or nr_document != False"/>
+                                    <field name="child_ids" readonly="1" nolabel="1" colspan="4"
+                                        invisible="document_type == 'act' and child_ids == False or nr_document != False"/>
+                                </group>
                             </page>
                             <page name="order_page" string="Sale Orders" invisible="not sale_ids">
                                 <field name="sale_ids" readonly="1"/>
                             </page>
                             <page name="purchase_order_page" string="Purchase Orders" invisible="not purchase_ids">
                                 <field name="purchase_ids" readonly="1"/>
-                            </page>
-
-                            <page name="aditional_page" string="Contract Addendums" invisible="document_type == 'act' and child_ids == False or nr_document != False">
-                                <field name="child_ids" readonly="1"/>
                             </page>
                             <page name="execution_page" string="Execution Destination">
                                 <field name="execution_ids" readonly="nr_document != False"/>
@@ -241,6 +236,25 @@
                                 		</notebook>
                                 	</form>
                                 </field>
+                            </page>
+                            <page name="contract_details" string="Other information">
+                              <group>
+                                <group name="contract_serials" string="Serials">
+                                    <label for="company_id" string="Customer" invisible="contract_type != 'sale'"/>
+                                    <label for="company_id" string="Supplier" invisible="contract_type != 'purchase'"/>
+
+                                    <field name="company_id" nolabel='1' readonly="nr_document != False"/>
+                                    <field name="regulation_id" domain="[('document_type','in',[document_type, False])]" invisible="document_type == 'act'" readonly="show_regulation == False" required="required_regulation == True"/>
+                                    <field name="can_change_regulation_adition_id" invisible="1"/>
+                                    <field name="regulation_adition_id" invisible="document_type =='act' or can_change_regulation_adition_id == False" domain="[('document_type','=','act')]"/>
+                                </group>
+                                <group name="contract_values" string="Values">
+                                  <field name="currency_id" readonly="nr_document != False"/>
+                                  <field name="valoare_fixa" readonly="nr_document != False"/>
+                                  <field name="valoare_fara_tva" readonly="nr_document != False"/>
+                                  <field name="valoare" readonly="nr_document != False"/>
+	                              </group>
+	                             </group>
                             </page>
                         </notebook>
                     </sheet>
@@ -282,21 +296,13 @@
     </record>
 
     <odoo>
-    <record id="action_smart_contract" model="ir.actions.act_window">
-        <field name="name">Contracte</field>
-        <field name="res_model">smart.contract</field>
-        <field name="view_mode">list,form</field>
-        <field name="context">{'group_by': ['document_type']}</field>
-    </record>
-</odoo>
-
-
-
-    <record id="action_contract" model="ir.actions.act_window">
-        <field name="name">Contracts</field>
-        <field name="res_model">smart.contract</field>
-        <field name="view_mode">list,form</field>
-    </record>
+        <record id="action_smart_contract" model="ir.actions.act_window">
+            <field name="name">Contracte</field>
+            <field name="res_model">smart.contract</field>
+            <field name="view_mode">list,form</field>
+            <field name="context">{'group_by': ['document_type']}</field>
+        </record>
+    </odoo>
 
     <menuitem id="root_menu_contracts"
         name="Contracts"
@@ -304,11 +310,33 @@
         web_icon="smart_contract,static/description/icon.png"
     />
 
-    <menuitem id="menu_contracts"
-        name="Contracts"
+    <record id="action_contract_sale" model="ir.actions.act_window">
+        <field name="name">Sale Contracts</field>
+        <field name="res_model">smart.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type', '=', 'sale')]</field>
+        <field name="context">{'default_contract_type': 'sale'}</field>
+    </record>
+
+    <menuitem id="menu_contracts_sale"
+    name="Sale Contracts"
+    parent="root_menu_contracts"
+    sequence="0"
+    action="action_contract_sale" />
+
+    <record id="action_contract_purchase" model="ir.actions.act_window">
+        <field name="name">Purchase Contracts</field>
+        <field name="res_model">smart.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('contract_type', '=', 'purchase')]</field>
+        <field name="context">{'default_contract_type': 'purchase'}</field>
+    </record>
+
+    <menuitem id="menu_contracts_purchase"
+        name="Purchase Contracts"
         parent="root_menu_contracts"
-        sequence="0"
-        action="action_contract" />
+        sequence="1"
+        action="action_contract_purchase" />
 
     <record id="contract_element_form" model="ir.ui.view">
             <field name="name">smart.contract.element.form</field>

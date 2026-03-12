@@ -29,20 +29,20 @@ class AccountEdiXmlUBL(models.Model):
             self._l10n_ro_import_retrieve_partner_bank(tree, invoice)
         return res
             
-    # def _import_retrieve_and_fill_partner(self, invoice, name, phone, mail, vat, country_code=False, street=False, street2=False, city=False, zip_code=False):
-    #     super(AccountEdiXmlUBL, self)._import_retrieve_and_fill_partner(invoice, name, phone, mail, vat, country_code=country_code, street=street, street2=street2, city=city, zip_code=zip_code)
-    #     if not invoice.partner_id:
-    #         dict_partner = {
-    #             'is_company': True,
-    #             'name': name or vat,
-    #             'vat': vat,
-    #             'email': mail,
-    #             'phone': phone,
-    #             'country_id': self.env['res.country'].search([('code','=',country_code)], limit=1).id or None
-    #             }
-    #         new_partner = self.env['res.partner'].create(dict_partner).id
-    #         new_partner.ro_vat_change()
-    #         invoice.partner_id = new_partner
+    def _import_retrieve_and_fill_partner(self, invoice, name, phone, mail, vat, country_code=False):
+        super(AccountEdiXmlUBL, self)._import_retrieve_and_fill_partner(invoice, name, phone, mail, vat, country_code=country_code)
+        if not invoice.partner_id:
+            dict_partner = {
+                'is_company': True,
+                'name': name or vat,
+                'vat': vat,
+                'email': mail,
+                'phone': phone,
+                'country_id': self.env['res.country'].search([('code','=',country_code)], limit=1).id or None
+                }
+            new_partner = self.env['res.partner'].create(dict_partner).id
+            new_partner.ro_vat_change()
+            invoice.partner_id = new_partner
 
     
     def _import_fill_invoice_line_form(self, journal, tree, invoice, invoice_line, qty_factor):

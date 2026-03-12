@@ -5,32 +5,37 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
-            <field name="active" position="after">
-                <field name="is_l10n_ro_record" invisible="1" />
-            </field>
             <field name="nrc" position="attributes">
-                <attribute name="invisible">1</attribute>
+                <attribute name="invisible">not is_company</attribute>
             </field>
-            <field name="vat" position="after">
-                <field name="nrc" attrs="{'invisible': [('is_company','=', False)]}" />
-                <field
-                    name="l10n_ro_caen_code"
-                    attrs="{'invisible': [('is_company','=', False)]}"
-                />
-                <label
-                    for="l10n_ro_vat_subjected"
-                    attrs="{'invisible': [('is_company','=', False),]}"
-                />
+            <field name="nrc" position="after">
+                <field name="l10n_ro_caen_code" invisible="not is_company" />
+                <label for="l10n_ro_vat_subjected" invisible="not is_company " />
                 <div
                     name="l10n_ro_vat_subjected_info"
                     class="o_row"
-                    attrs="{'invisible': [('is_company','=', False)]}"
+                    invisible="not is_company "
                 >
                     <field name="l10n_ro_vat_subjected" />
                 </div>
 
                 <field name="l10n_ro_vat_number" invisible="1" />
             </field>
+        </field>
+    </record>
+
+    <record id="view_partner_anaf_status_form" model="ir.ui.view">
+        <field name="name">res.partner.anaf.status.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form" />
+        <field name="arch" type="xml">
+            <page name="accounting" position="after">
+                <page
+                    string="ANAF"
+                    name="l10n_ro_anaf_info"
+                    groups="l10n_ro_config.group_ro_menus"
+                />
+            </page>
         </field>
     </record>
 </odoo>

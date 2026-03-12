@@ -1,11 +1,10 @@
 <odoo>
     <record id="vpicktree" model="ir.ui.view">
-        <field name="name">stock.picking.tree</field>
+        <field name="name">stock.picking.list</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.vpicktree" />
         <field name="arch" type="xml">
             <field name="scheduled_date" position="before">
-                <field name="is_l10n_ro_record" invisible="1" />
                 <field name="l10n_ro_accounting_date" readonly="1" />
             </field>
         </field>
@@ -16,15 +15,8 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form" />
         <field name="arch" type="xml">
-            <xpath expr="//label[@for='scheduled_date']" position="before">
-                <field name="is_l10n_ro_record" invisible="1" />
-                <label for="l10n_ro_accounting_date" />
-                <div class="o_row">
-                    <field
-                        name="l10n_ro_accounting_date"
-                        attrs="{'readonly': [('state', '=', 'done')]}"
-                    />
-                </div>
+            <xpath expr="//field[@name='date_deadline']" position="after">
+                <field name="l10n_ro_accounting_date" readonly="state == 'done'" />
             </xpath>
         </field>
     </record>
@@ -35,7 +27,6 @@
         <field name="inherit_id" ref="stock.view_picking_internal_search" />
         <field name="arch" type="xml">
             <filter name="expected_date" position="before">
-                <field name="is_l10n_ro_record" invisible="1" />
                 <filter
                     string="Accounting Date"
                     name="accounting_date"
@@ -43,7 +34,6 @@
                     context="{'group_by': 'l10n_ro_accounting_date'}"
                 />
             </filter>
-
         </field>
     </record>
 </odoo>

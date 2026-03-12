@@ -14,14 +14,14 @@
           class="btn btn-primary"
           name="setAnafEnvProduction"
           type="object"
-          attrs="{'invisible':[('anaf_env','=','production'),('state','=','open')]}"
+          invisible="anaf_env == 'production' and state == 'open'"
         />
                         <button
           string="Set Test Env"
           class="btn btn-primary"
           name="setAnafEnvTest"
           type="object"
-          attrs="{'invisible':[('anaf_env','=','test'),('state','=','open')]}"
+          invisible="anaf_env == 'test' and state == 'open'"
         />
                     </xpath>
                 </field>

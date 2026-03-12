@@ -3,10 +3,11 @@
 {
     "name": "Romania - Partner Create by VAT",
     "category": "Localization",
+    "countries": ["ro"],
     "summary": "Romania - Partner Create by VAT",
     "depends": ["l10n_ro_config"],
     "license": "AGPL-3",
-    "version": "16.0.1.10.0",
+    "version": "19.0.0.5.0",
     "author": "NextERP Romania,"
     "Forest and Biomass Romania,"
     "Odoo Community Association (OCA)",

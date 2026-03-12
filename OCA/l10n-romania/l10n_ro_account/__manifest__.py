@@ -4,8 +4,9 @@
 
 {
     "name": "Romania - Account",
-    "version": "16.0.1.7.0",
+    "version": "19.0.0.5.0",
     "summary": "Romania - Account",
+    "countries": ["ro"],
     "license": "AGPL-3",
     "author": "Terrabit,Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/l10n-romania",

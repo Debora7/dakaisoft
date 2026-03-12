@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='edi_document_ids']//tree" position="inside">
                 <field name="state" invisible="1"/>
-                <button name="l10n_ro_set_bloching_level_error" type="object" class="oe_link oe_inline" string="Schedule Resend" groups="base.group_no_one" attrs="{'invisible': [('state', 'in', ['cancel','sent'])]}"/>
+                <button name="l10n_ro_set_bloching_level_error" type="object" class="oe_link oe_inline" string="Schedule Resend" groups="base.group_no_one" invisible="state in ['cancel','sent']"/>
             </xpath>
         </field>
     </record>

@@ -15,6 +15,11 @@ class StockMove(models.Model):
         domain=[("l10n_ro_is_nondeductible", "=", True)],
         copy=False,
     )
+    l10n_ro_nondeductible_percent = fields.Selection(
+        [("0", "Deductible"), ("50", "50% Nondeductible"), ("100", "Nondeductible")],
+        string="Romania - Non Deductible Percent",
+        default="0",
+    )
     l10n_ro_nondeductible_usage = fields.Boolean(
         compute="_compute_l10n_ro_nondeductible_usage",
         string="Romania - Allow Non Deductible",
@@ -34,33 +39,18 @@ class StockMove(models.Model):
             else:
                 s.l10n_ro_nondeductible_usage = False
 
-    def _generate_valuation_lines_data(
-        self,
-        partner_id,
-        qty,
-        debit_value,
-        credit_value,
-        debit_account_id,
-        credit_account_id,
-        svl_id,
-        description,
-    ):
-        res = super(StockMove, self)._generate_valuation_lines_data(
-            partner_id,
-            qty,
-            debit_value,
-            credit_value,
-            debit_account_id,
-            credit_account_id,
-            svl_id,
-            description,
-        )
-        if self.is_l10n_ro_record:
-            if self.l10n_ro_nondeductible_tax_id:
-                if res.get("debit_line_vals"):
-                    res["debit_line_vals"].update(
+    def _get_account_move_line_vals(self):
+        # For nondeductible operation, add the taxes to the expense debit line
+        res = super()._get_account_move_line_vals()
+        if self.l10n_ro_nondeductible_tax_id:
+            for line in res:
+                account = self.env["account.account"].browse(line["account_id"])
+                if account.account_type == "expense":
+                    line.update(
                         {
                             "tax_ids": [(6, 0, [self.l10n_ro_nondeductible_tax_id.id])],
+                            "deductible_amount": 100
+                            - int(self.l10n_ro_nondeductible_percent),
                         }
                     )
         return res

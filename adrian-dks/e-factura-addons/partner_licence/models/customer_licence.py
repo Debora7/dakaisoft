@@ -1,10 +1,17 @@
 import random
 import string
+from datetime import timedelta
 from urllib.parse import urlparse
 
 import requests
 from odoo import api, fields, models
 
+_MAX_TIME = 300  # seconds
+
+
+class Bunch(object):
+    def __init__(self, adict):
+        self.__dict__.update(adict)
 
 class partnerLicence(models.Model):
     _name = "res.partner.licence"
@@ -32,6 +39,9 @@ class partnerLicence(models.Model):
         ],
         default="closed",
     )
+    to_update = fields.Boolean(default=False)
+    to_update_datetime = fields.Datetime()
+    anaf_env = fields.Selection([("test", "Test"), ("production", "Production")])
 
     @api.depends("partner_id", "scope", "licence")
     def _compute_RecordName(self):
@@ -192,3 +202,51 @@ class partnerLicence(models.Model):
                 }
             )
         return msg
+
+
+    def _checkPermission(self, *args, **kwargs):
+        # Close orphan requests above
+        self.search(
+            [
+                (
+                    "to_update_datetime",
+                    "<=",
+                    (fields.Datetime.now() - timedelta(seconds=_MAX_TIME)),
+                ),
+                ("to_update", "=", True),
+            ]
+        ).write(
+            {
+                "to_update": False,
+                "to_update_datetime": None,
+            }
+        )
+        # Direct in SQL NOW() e `with timezone`, ceea ce face un decalaj de fus orar, convertirea la timestamp, mareste la Ex: 2ore + _MAX_TIME
+        # Pentru un trafic mai mare este nevoie ca anularea request orfane, sa fie procesate direct in SQL.
+        # self._cr.execute("UPDATE res_partner_licence SET to_update_datetime=NULL, to_update=FALSE where to_update=TRUE and to_update_datetime <= (CURRENT_TIMESTAMP(0) - interval '%s seconds')::timestamp;", (_MAX_TIME,))
+        check = self.search([("to_update", "=", True)])
+
+        res = Bunch({"error": False, "values": {}})
+
+        messages = {}
+
+        if len(check) != 0:
+            diff_time = fields.Datetime.now() - check.to_update_datetime
+            df_sec = _MAX_TIME - (diff_time.days * 12 * 60 * 60 + diff_time.seconds)
+            tformat = divmod(df_sec, 60)
+            df_min = ":".join([str(tformat[0]), str(round(tformat[1], 0))])
+            messages = {"message": f"Busy...Waiting time {df_min} minutes..."}
+            res.error = True
+
+        if not kwargs.get("licence_entry", None):
+            messages = {"message": f"Restricted! No licence"}
+            res.error = True
+
+        if kwargs.get("referer", None) and kwargs.get("licence_entry", None):
+            licence = kwargs.get("licence_entry")
+            if licence.url not in kwargs.get("referer"):
+                messages = {"message": f"Wrong request origin"}
+                res.error = True
+
+        res.values = messages
+        return res

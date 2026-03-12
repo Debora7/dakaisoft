@@ -1,7 +1,7 @@
 {
     "name": "Partner Licence Anaf",
     "description": "",
-    "version": "16.0.0.4",
+    "version": "19.0.0.0",
     "website": "https://dakai.ro",
     "author": "Dakai SOFT SRL",
     "maintainers": ["adrian-dks"],

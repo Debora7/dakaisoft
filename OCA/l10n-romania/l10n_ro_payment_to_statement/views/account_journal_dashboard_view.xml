@@ -5,14 +5,14 @@
         <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view" />
         <field name="arch" type="xml">
             <xpath
-                expr="//t[@t-name='JournalBodyBankCash']/div[hasclass('o_kanban_primary_right')]"
+                expr="//t[@t-name='JournalBodyBankCash']/div[@name='kanban_primary_right']"
                 position="inside"
             >
                 <div class="row">
-                    <div class="col overflow-hidden text-start">
+                    <div class="col overflow-hidden text-left">
                         <span title="Transfer">Transfer</span>
                     </div>
-                    <div class="col-auto text-end">
+                    <div class="col-auto text-right">
                         <span>
                             <t t-esc="dashboard.account_transfer_balance" />
                         </span>

@@ -1,6 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_partner_create_container,access_partner_create_container,model_partner_create_container,,1,1,1,1
-access_partner_create_connector,access_partner_create_connector,model_partner_create_connector,,1,1,1,1
-access_partner_create_mapping,access_partner_create_mapping,model_partner_create_mapping,,1,1,1,1
-access_partner_create_header,access_partner_create_header,model_partner_create_header,,1,1,1,1
-access_partner_create_body,access_partner_create_body,model_partner_create_body,,1,1,1,1

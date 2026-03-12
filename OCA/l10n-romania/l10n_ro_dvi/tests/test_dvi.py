@@ -5,53 +5,96 @@
 from odoo.exceptions import ValidationError
 from odoo.tests import Form, tagged
 
-from odoo.addons.l10n_ro_stock_account.tests.common2 import TestStockCommon2
+from odoo.addons.l10n_ro_stock_account.tests.common import TestROStockCommon
 
 
 @tagged("post_install", "-at_install")
-class TestDVI(TestStockCommon2):
+class TestDVI(TestROStockCommon):
     @classmethod
     def setUpClass(cls):
-        super(TestDVI, cls).setUpClass()
+        super().setUpClass()
+        cls.log_checks = False
         cls.env.company._l10n_ro_get_or_create_custom_duty_product()
         cls.env.company._l10n_ro_get_or_create_customs_commission_product()
-        cls.tax_id = cls.product_1.supplier_taxes_id
+        cls.tax_id = cls.product_fifo.supplier_taxes_id
+        cls.product_fifo.supplier_taxes_id = None
         cls.journal_id = cls.env["account.journal"].search(
             [("type", "=", "general"), ("company_id", "=", cls.env.company.id)], limit=1
         )
 
+    def make_purchase(self):
+        return [
+            {
+                "case_no": "1",
+                "type": "purchase",
+                "currency_id": self.env.company.currency_id,
+                "partner_id": self.supplier_1,
+                "product_id": self.product_fifo,
+                "step": 1,
+                "qty": 10.0,
+                "stock_qty": 10.0,
+                "inv_qty": 10.0,
+                "price": 100.0,
+                "inv_price": 100.0,
+                "checks1": {
+                    "stock": {
+                        "product_fifo": [
+                            {"location": "location", "qty": 10, "value": 1000}
+                        ]
+                    },
+                    "account": {"371000": 1000},
+                },
+                "checks2": {
+                    "stock": {
+                        "product_fifo": [
+                            {"location": "location", "qty": 10, "value": 1150}
+                        ]
+                    },
+                    "account": {"371000": 1150},
+                },
+                "name": "Receptie + inventar cu data contabila",
+            },
+        ]
+
     def test_dvi(self):
-        self.create_po()
-        self.create_invoice()
+        purchase = self.env["purchase.order"]
+        for value in self.make_purchase():
+            purchase |= self.create_purchase(value)
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50
-
-        dvi.invoice_ids.add(self.invoice)
+        dvi.invoice_ids.add(purchase.invoice_ids)
         dvi = dvi.save()
 
         for dvi_line in dvi.line_ids:
             dvi_line.line_qty = dvi_line.qty
 
-        self.check_stock_valuation(self.val_p1_i, self.val_p2_i)
-        self.check_account_valuation(self.val_p1_i, self.val_p2_i)
+        for value in self.make_purchase():
+            self.run_checks(value.get("checks1"))
+        # self.check_stock_valuation(self.val_p1_i, self.val_p2_i)
+        # self.check_account_valuation(self.val_p1_i, self.val_p2_i)
         for line in dvi.line_ids:
             self.assertEqual(line.price_subtotal, line.base_amount)
-            self.assertAlmostEqual(line.vat_amount, round(line.base_amount * 0.19, 2))
+            self.assertAlmostEqual(line.vat_amount, round(line.base_amount * 0.21, 2))
         inv_subtotal = -1 * dvi.invoice_ids.amount_untaxed_signed
 
         dvi._compute_amount()
         self.assertEqual(dvi.invoice_base_value, inv_subtotal)
-        self.assertEqual(dvi.invoice_tax_value, round(inv_subtotal * 0.19, 2))
+        self.assertEqual(dvi.invoice_tax_value, round(inv_subtotal * 0.21, 2))
         self.assertEqual(
             dvi.total_base_tax_value, inv_subtotal + dvi.customs_duty_value
         )
         self.assertEqual(
             dvi.total_tax_value,
-            round((inv_subtotal + dvi.customs_duty_value) * 0.19, 2),
+            round((inv_subtotal + dvi.customs_duty_value) * 0.21, 2),
         )
         dvi.button_post()
         lc = dvi.landed_cost_ids
@@ -62,6 +105,12 @@ class TestDVI(TestStockCommon2):
         self.assertEqual(lc.l10n_ro_account_dvi_id, dvi)
         self.assertEqual(lc.l10n_ro_dvi_bill_ids, dvi.invoice_ids)
         lc.button_validate()
+
+        # Need Recompute quant value.
+        quant = self.env["stock.quant"].search(
+            [("product_id", "=", self.product_fifo.id)]
+        )
+        quant.write({"company_id": lc.company_id.id})
         # Because of landed costs rounding issues, which is using ROUND=UP,
         # we will have more with 0.02 in stock
         # Example for product_1 split:
@@ -71,8 +120,10 @@ class TestDVI(TestStockCommon2):
         # 600 / 1100 * 25 = 13,636363636 -> ROUNDED TO 13.64
         # TOTAL TO BE SPLITTED 75 -> ROUNDED 75.02
         # For product_2 the 0.02 will be deducted
-        self.check_stock_valuation(self.val_p1_i + 75.02, self.val_p2_i + 74.98)
-        self.check_account_valuation(self.val_p1_i + 75.02, self.val_p2_i + 74.98)
+        for value in self.make_purchase():
+            self.run_checks(value.get("checks2"))
+        # self.check_stock_valuation(self.val_p1_i + 75.00, self.val_p2_i + 75.00)
+        # self.check_account_valuation(self.val_p1_i + 75.00, self.val_p2_i + 75.00)
 
         # urmatoarele teste nu merg
         # vat_paid_aml_name = "VAT paid at customs"
@@ -90,17 +141,22 @@ class TestDVI(TestStockCommon2):
         # Revert DVI
         dvi.button_reverse()
         revert_lc = dvi.landed_cost_ids - lc
-        self.check_stock_valuation(self.val_p1_i, self.val_p2_i)
-        self.check_account_valuation(self.val_p1_i, self.val_p2_i)
+        # recompute quant value.
+        quant.write({"company_id": lc.company_id.id})
+
+        for value in self.make_purchase():
+            self.run_checks(value.get("checks1"))
+        # self.check_stock_valuation(self.val_p1_i, self.val_p2_i)
+        # self.check_account_valuation(self.val_p1_i, self.val_p2_i)
         inv_subtotal = -1 * dvi.invoice_ids.amount_untaxed_signed
         self.assertEqual(dvi.invoice_base_value, inv_subtotal)
-        self.assertEqual(dvi.invoice_tax_value, round(inv_subtotal * 0.19, 2))
+        self.assertEqual(dvi.invoice_tax_value, round(inv_subtotal * 0.21, 2))
         self.assertEqual(
             dvi.total_base_tax_value, inv_subtotal + dvi.customs_duty_value
         )
         self.assertEqual(
             dvi.total_tax_value,
-            round((inv_subtotal + dvi.customs_duty_value) * 0.19, 2),
+            round((inv_subtotal + dvi.customs_duty_value) * 0.21, 2),
         )
         self.assertEqual(revert_lc.l10n_ro_cost_type, "dvi")
         self.assertEqual(revert_lc.l10n_ro_tax_id, dvi.tax_id)
@@ -114,8 +170,10 @@ class TestDVI(TestStockCommon2):
 
     def test_vat_price_difference(self):
         # pentru valoare pozitiva
-        self.create_po()
-        self.create_invoice()
+        purchase = self.env["purchase.order"]
+        for value in self.make_purchase():
+            purchase |= self.create_purchase(value)
+            self.run_checks(value.get("checks1"))
         self.account_expense = self.env["account.account"].search(
             [("code", "=", "658820")], limit=1
         )
@@ -140,7 +198,12 @@ class TestDVI(TestStockCommon2):
         )
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test vat difference"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50
@@ -155,11 +218,16 @@ class TestDVI(TestStockCommon2):
             else:
                 self.assertEqual(line.credit, 10)
         # pentru valoare negativa
-        self.create_po()
-        self.create_invoice()
+        # self.create_po()
+        # self.create_invoice()
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test vat difference"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50
@@ -168,7 +236,7 @@ class TestDVI(TestStockCommon2):
         dvi = dvi.save()
         dvi.button_post()
         for line in dvi.vat_price_difference_move_id.line_ids:
-            tags = self.tax_id.invoice_repartition_line_ids.filtered(
+            tags = tax_id.invoice_repartition_line_ids.filtered(
                 lambda m: m.repartition_type == "tax"
             )[0]
             if line.account_id.id == tags.account_id.id:
@@ -177,8 +245,8 @@ class TestDVI(TestStockCommon2):
                 self.assertEqual(line.debit, 10)
 
         # cand da reverse move-ul trebuie sa fie in cancel
-        self.create_po()
-        self.create_invoice()
+        # self.create_po()
+        # self.create_invoice()
         self.vat_product_id = self.env["product.product"].create(
             {
                 "name": "VAT Price Difference",
@@ -189,14 +257,19 @@ class TestDVI(TestStockCommon2):
         )
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test vat difference"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50
         dvi.vat_price_difference = -10
         dvi.vat_price_difference_product_id = self.vat_product_id
         dvi = dvi.save()
-        dvi.invoice_ids = [(6, 0, self.invoice.ids)]
+        dvi.invoice_ids = [(6, 0, purchase.invoice_ids.ids)]
         for dvi_line in dvi.line_ids:
             dvi_line.line_qty = dvi_line.qty
         dvi.button_post()
@@ -206,8 +279,8 @@ class TestDVI(TestStockCommon2):
         self.assertEqual(dvi.vat_price_difference_move_id.state, "cancel")
 
         # daca nu exista cont pe produsul vat_product_id
-        self.create_po()
-        self.create_invoice()
+        # self.create_po()
+        # self.create_invoice()
         self.vat_product_id = self.env["product.product"].create(
             {
                 "name": "VAT Price Difference",
@@ -217,9 +290,15 @@ class TestDVI(TestStockCommon2):
             }
         )
         self.vat_product_id.categ_id.property_account_expense_categ_id = False
+        self.env.company.expense_account_id = False
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test vat difference"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50
@@ -228,13 +307,13 @@ class TestDVI(TestStockCommon2):
         dvi = dvi.save()
         with self.assertRaises(
             ValidationError,
-            msg="Expense account is not set on product VAT Price Difference",
+            msg="Expense account is not set on product VAT Price Difference 1123",
         ):
             dvi.button_post()
 
         # daca nu exista cont pe produsul vat_product_id
-        self.create_po()
-        self.create_invoice()
+        # self.create_po()
+        # self.create_invoice()
         self.vat_product_id = self.env["product.product"].create(
             {
                 "name": "VAT Price Difference",
@@ -246,7 +325,12 @@ class TestDVI(TestStockCommon2):
         )
         dvi = Form(self.env["l10n.ro.account.dvi"])
         dvi.name = "DVI test vat difference"
-        dvi.tax_id = self.tax_id
+        tax_id = self.tax_id
+        if len(self.tax_id) > 1:
+            tax_id = self.tax_id.filtered(
+                lambda tax: tax.company_id == self.env.company
+            )[0]
+        dvi.tax_id = tax_id
         dvi.journal_id = self.journal_id
         dvi.customs_duty_value = 100
         dvi.customs_commission_value = 50

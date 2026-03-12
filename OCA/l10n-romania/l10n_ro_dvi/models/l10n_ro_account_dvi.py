@@ -2,8 +2,12 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 
-from odoo import _, api, fields, models
+import logging
+
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountInvoiceDVI(models.Model):
@@ -34,9 +38,7 @@ class AccountInvoiceDVI(models.Model):
         "account.journal",
         string="Journal",
         required=True,
-        readonly=True,
         domain="[('type', '=', 'general')]",
-        states={"draft": [("readonly", False)]},
     )
     currency_id = fields.Many2one(
         related="company_id.currency_id",
@@ -57,18 +59,16 @@ class AccountInvoiceDVI(models.Model):
         "dvi_id",
         string="DVI Lines",
         copy=False,
-        readonly=False,
-        states={"done": [("readonly", True)]},
     )
     total_base_tax_value = fields.Monetary(
         compute="_compute_total_tax_value",
-        readonly=1,
+        readonly=True,
         help="Is readonly sum of product tax and custom tax."
         "This must be the tax value that you have on dvi",
     )
     total_tax_value = fields.Monetary(
         compute="_compute_total_tax_value",
-        readonly=1,
+        readonly=True,
         help="Is readonly sum of product tax and custom tax."
         "This must be the tax value that you have on dvi",
     )
@@ -78,11 +78,12 @@ class AccountInvoiceDVI(models.Model):
         required=True,
         help="A product type service with l10n_ro_custom_duty checked"
         " (purchase tab).  Journal entry for duty will be with this product &"
-        " default vat for custom duty and invoice - to find it in declaration based on tags",
+        " default vat for custom duty and invoice - to find it in declaration"
+        " based on tags",
     )
     customs_duty_value = fields.Monetary(help="This is a value from received dvi")
     customs_duty_tax_value = fields.Monetary(
-        readonly=1,
+        readonly=True,
         compute="_compute_total_tax_value",
         help="readonly computed tax from custom_duty_value",
     )
@@ -120,12 +121,12 @@ class AccountInvoiceDVI(models.Model):
         "product.product", help="Product for vat price difference"
     )
     vat_price_difference_move_id = fields.Many2one(
-        "account.move", readonly=1, help="Move for vat price difference"
+        "account.move", readonly=True, help="Move for vat price difference"
     )
 
     @api.model
     def default_get(self, fields_list):
-        defaults = super(AccountInvoiceDVI, self).default_get(fields_list)
+        defaults = super().default_get(fields_list)
         defaults["date"] = fields.Date.today()
         if "company_id" not in defaults:
             defaults["company_id"] = self.env.company
@@ -152,7 +153,7 @@ class AccountInvoiceDVI(models.Model):
         self.ensure_one()
         if not self.landed_cost_ids:
             raise ValidationError(
-                _("You do not have created landed costs for this DVI")
+                self.env._("You do not have created landed costs for this DVI")
             )
         action = self.env.ref("stock_landed_costs.action_stock_landed_cost")
         action = action.sudo().read()[0]
@@ -192,7 +193,7 @@ class AccountInvoiceDVI(models.Model):
                         lambda line: line.display_type
                         not in ("line_section", "line_note")
                         and (
-                            line.product_id.type == "product"
+                            line.product_id.type == "consu"
                             or line.is_landed_costs_line is True
                         )
                     )
@@ -223,9 +224,11 @@ class AccountInvoiceDVI(models.Model):
         vals = {}
         msg = "Expense account is not set on product %s."
         if not account1:
-            raise ValidationError(_(msg) % self.vat_price_difference_product_id.name)
+            raise ValidationError(
+                (self.env._(msg), self.vat_price_difference_product_id.name)
+            )
         if not account2:
-            raise ValidationError(_(msg) % self.customs_duty_product_id.name)
+            raise ValidationError((self.env._(msg), self.customs_duty_product_id.name))
         if account1 and account2:
             amount = self.vat_price_difference
             tags = self.tax_id.invoice_repartition_line_ids.filtered(
@@ -269,39 +272,42 @@ class AccountInvoiceDVI(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         dvis = super().create(vals_list)
-        for dvi in dvis:
-            if dvi.invoice_ids:
-                new_lines = []
-                if dvi.line_ids:
-                    dvi.line_ids.unlink()
-                for invoice in dvi.invoice_ids:
-                    invoice_lines = invoice.invoice_line_ids.filtered(
-                        lambda line: line.display_type
-                        not in ("line_section", "line_note")
-                        and (
-                            line.product_id.type == "product"
-                            or line.is_landed_costs_line is True
-                        )
-                    )
-                    for inv_line in invoice_lines:
-                        new_lines.append(
-                            (
-                                0,
-                                0,
-                                {
-                                    "dvi_id": dvi.id,
-                                    "invoice_id": invoice.id,
-                                    "invoice_line_id": inv_line.id,
-                                },
+        for vals in vals_list:
+            if vals.get("invoice_ids"):
+                for dvi in dvis:
+                    new_lines = []
+                    if dvi.line_ids:
+                        dvi.line_ids.unlink()
+                    for invoice in dvi.invoice_ids:
+                        invoice_lines = invoice.invoice_line_ids.filtered(
+                            lambda line: line.display_type
+                            not in ("line_section", "line_note")
+                            and (
+                                line.product_id.type == "consu"
+                                or line.is_landed_costs_line is True
                             )
                         )
-                dvi.line_ids = new_lines
+                        for inv_line in invoice_lines:
+                            new_lines.append(
+                                (
+                                    0,
+                                    0,
+                                    {
+                                        "dvi_id": dvi.id,
+                                        "invoice_id": invoice.id,
+                                        "invoice_line_id": inv_line.id,
+                                    },
+                                )
+                            )
+                    dvi.line_ids = new_lines
         return dvis
 
     def button_post(self):
         self.ensure_one()
         if self.state != "draft":
-            raise ValidationError(_("You can only post DVI from 'draft' state."))
+            raise ValidationError(
+                self.env._("You can only post DVI from 'draft' state.")
+            )
 
         values = self.prepare_dvi_landed_cost_values()
         landed_cost = self.env["stock.landed.cost"].create(values)
@@ -326,7 +332,7 @@ class AccountInvoiceDVI(models.Model):
     def button_reverse(self):
         self.ensure_one()
         if self.state != "posted":
-            raise UserError(_("Only Posted DVI can be reversed."))
+            raise UserError(self.env._("Only Posted DVI can be reversed."))
         for lc in self.landed_cost_ids:
             if lc.account_move_id:
                 if lc.account_move_id.state == "posted":
@@ -367,9 +373,7 @@ class AccountInvoiceDVI(models.Model):
 
         if self.customs_commission_value:
             product = self.customs_commission_product_id
-            accounts_data = (
-                self.customs_commission_product_id.product_tmpl_id.get_product_accounts()
-            )
+            accounts_data = product.product_tmpl_id.get_product_accounts()
             values["cost_lines"] += self.prepare_dvi_landed_cost_lines(
                 product, self.customs_commission_value, accounts_data
             )

@@ -8,7 +8,7 @@ from datetime import timedelta
 import pytz
 
 from odoo import api, fields, models
-from odoo.osv.expression import AND
+from odoo.fields import Domain
 
 
 class ReportSaleDetails(models.AbstractModel):
@@ -18,15 +18,12 @@ class ReportSaleDetails(models.AbstractModel):
     def get_sale_details(
         self, date_start=False, date_stop=False, config_ids=False, session_ids=False
     ):
-
-        res = super(ReportSaleDetails, self).get_sale_details(
-            date_start, date_stop, config_ids, session_ids
-        )
+        res = super().get_sale_details(date_start, date_stop, config_ids, session_ids)
 
         domain = [("state", "in", ["paid", "invoiced", "done"])]
 
         if session_ids:
-            domain = AND([domain, [("session_id", "in", session_ids)]])
+            domain = Domain.AND([domain, [("session_id", "in", session_ids)]])
         else:
             if date_start:
                 date_start = fields.Datetime.from_string(date_start)
@@ -49,7 +46,7 @@ class ReportSaleDetails(models.AbstractModel):
                 # stop by default today 23:59:59
                 date_stop = date_start + timedelta(days=1, seconds=-1)
 
-            domain = AND(
+            domain = Domain.AND(
                 [
                     domain,
                     [
@@ -60,7 +57,7 @@ class ReportSaleDetails(models.AbstractModel):
             )
 
             if config_ids:
-                domain = AND([domain, [("config_id", "in", config_ids)]])
+                domain = Domain.AND([domain, [("config_id", "in", config_ids)]])
 
         orders = self.env["pos.order"].search(domain)
 
@@ -75,21 +72,8 @@ class ReportSaleDetails(models.AbstractModel):
                 products_sold[key] += line.qty
             for picking in order.picking_ids:
                 for move in picking.move_ids:
-                    value = 0
-                    quantity = 0
-                    for valuation in move.stock_valuation_layer_ids:
-                        if (
-                            valuation.l10n_ro_valued_type == "internal_transfer"
-                            and not valuation.account_move_id
-                        ):
-                            continue
-                        if (
-                            valuation.l10n_ro_valued_type == "dropshipped"
-                            and valuation.value < 0
-                        ):
-                            continue
-                        value += abs(valuation.value)
-                        quantity += abs(valuation.quantity)
+                    value = move.value
+                    quantity = move.quantity
 
                     products_stock.setdefault(move.product_id.id, 0.0)
                     products_stock_qty.setdefault(move.product_id.id, 0.0)
@@ -119,6 +103,6 @@ class ReportSaleDetails(models.AbstractModel):
             products += [values]
             total_stock_amount += stock_price * qty
 
-        res["products"] = sorted(products, key=lambda l: l["product_name"])
+        # res["products"] = sorted(products, key=lambda l: l["product_name"])
         res["total_stock_amount"] = total_stock_amount
         return res

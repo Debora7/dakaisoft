@@ -2,7 +2,7 @@
 {
   'name':'E-factura Product Names',
   'description': "",
-  'version':'16.0.0.1',
+  'version':'19.0.0.0',
   'author':'Dakai SOFT',
   'website': 'https://dakai.ro',
   'author': 'Dakai SOFT SRL',

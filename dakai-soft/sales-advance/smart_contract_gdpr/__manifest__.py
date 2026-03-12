@@ -2,7 +2,7 @@
 {
   'name':'smart_contract_gdpr',
   'description': "",
-  'version':'1.0',
+  'version':'19.0.0.0.0',
   'author':'Dakai SOFT',
   'data': [
     #'security/ir.model.access.csv',

@@ -7,6 +7,7 @@ from datetime import datetime, date
 import re
 #from numbers import ToArabic, ToRoman
 from . import numbers
+import logging
 
 ToArabic, ToRoman = numbers.ToArabic, numbers.ToRoman
 
@@ -78,6 +79,7 @@ class Contract(models.Model):
     user_id = fields.Many2one(comodel_name='res.users', string='Responsible', index=True,
                               default=lambda self: self.env.user)
     create_date_only = fields.Date(string="Creation Date Only", compute='_compute_create_date_only', store=True)
+    contract_type = fields.Selection([('sale', 'Sales'), ('purchase', 'Purchase'),], required=True,)
 
     @api.depends('create_date')
     def _compute_create_date_only(self):
@@ -200,6 +202,14 @@ class Contract(models.Model):
     def default_get(self, lista):
         res = super(Contract,self).default_get(lista)
         res['partner_id'] = self.env.context.get('partner_id')
+
+        if self.env.context.get('contract_type') == 'sale':
+            res['contract_type'] = 'sale'
+            res['type'] = 'custommer'
+            
+        if self.env.context.get('contract_type')  == 'purchase':
+            res['contract_type'] = 'purchase'
+            res['type'] = 'supplier'
         return res
 
     def intocmire(self):
@@ -223,17 +233,7 @@ class Contract(models.Model):
                 if self.nr_document:
                     name = _("Contract Addendum %s for %s") % (self.nr_document, self.parent_id.nr_document)
                 s.name = name
-            elif s.document_type == 'gdpr':
-                name = _("GDPR %s") % date
-                if self.nr_document:
-                    name = _("GDPR %s for %s") % (self.nr_document, self.parent_id.nr_document)
-                s.name = name
-            elif s.document_type == 'notificare':
-                name = _("Notification %s") % date
-                if self.nr_document:
-                    name = _("Notification %s for %s") % (self.nr_document, self.parent_id.nr_document)
-                s.name = name
-
+                
     def set_signed(self):
         if not self.signed_date:
             raise UserError(_("Signed date is not set!"))

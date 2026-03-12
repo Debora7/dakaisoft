@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-28 05:20+0000\n"
-"PO-Revision-Date: 2024-05-22 12:34+0300\n"
+"PO-Revision-Date: 2026-01-08 20:42+0000\n"
 "Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
 "Language-Team: \n"
 "Language: ro\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Weblate 5.10.4\n"
 
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,help:l10n_ro_dvi.field_l10n_ro_account_dvi__customs_duty_product_id
@@ -41,9 +41,21 @@ msgid "Attachment Count"
 msgstr "Număr de atașamente"
 
 #. module: l10n_ro_dvi
+#. odoo-python
+#: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
+msgid "BASE paid at customs"
+msgstr "Bază plată în vamă"
+
+#. module: l10n_ro_dvi
+#. odoo-python
+#: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
+msgid "BASE paid at customs expense"
+msgstr "Bază plată în vamă cheltuială"
+
+#. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__price_subtotal
 msgid "Balance"
-msgstr ""
+msgstr "Sold"
 
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__base_amount
@@ -95,7 +107,6 @@ msgstr "Moneda"
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/res_company.py:0
-#, python-format
 msgid "Custom Duty"
 msgstr "Taxă vamală"
 
@@ -103,7 +114,6 @@ msgstr "Taxă vamală"
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/res_company.py:0
 #: model_terms:ir.ui.view,arch_db:l10n_ro_dvi.view_account_dvi_form
-#, python-format
 msgid "Customs Commission"
 msgstr "Comision vamal"
 
@@ -174,7 +184,6 @@ msgstr "Referință DVI"
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,help:l10n_ro_dvi.field_account_bank_statement_line__l10n_ro_dvi_ids
 #: model:ir.model.fields,help:l10n_ro_dvi.field_account_move__l10n_ro_dvi_ids
-#: model:ir.model.fields,help:l10n_ro_dvi.field_account_payment__l10n_ro_dvi_ids
 msgid "DVI's linked to this invoice"
 msgstr "DVI-urile legate de această factură"
 
@@ -184,8 +193,12 @@ msgid "Date"
 msgstr "Data"
 
 #. module: l10n_ro_dvi
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_account_move__display_name
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__display_name
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__display_name
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_res_company__display_name
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_stock_landed_cost__display_name
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_stock_valuation_adjustment_lines__display_name
 msgid "Display Name"
 msgstr "Nume afișat"
 
@@ -210,8 +223,12 @@ msgid "Has Message"
 msgstr "Are mesaj"
 
 #. module: l10n_ro_dvi
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_account_move__id
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__id
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__id
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_res_company__id
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_stock_landed_cost__id
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_stock_valuation_adjustment_lines__id
 msgid "ID"
 msgstr "ID"
 
@@ -319,12 +336,6 @@ msgid "Landed Costs"
 msgstr "Costuri Adiționale Stoc"
 
 #. module: l10n_ro_dvi
-#: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi____last_update
-#: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line____last_update
-msgid "Last Modified on"
-msgstr "Ultima modificare pe"
-
-#. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__write_uid
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__write_uid
 msgid "Last Updated by"
@@ -335,11 +346,6 @@ msgstr "Ultima actualizare de către"
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__write_date
 msgid "Last Updated on"
 msgstr "Ultima actualizare pe"
-
-#. module: l10n_ro_dvi
-#: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__message_main_attachment_id
-msgid "Main Attachment"
-msgstr "Atașamentul principal"
 
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__message_has_error
@@ -384,7 +390,6 @@ msgstr "Numărul de mesaje cu eroare de livrare"
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/l10n_ro_account_dvi.py:0
-#, python-format
 msgid "Only Posted DVI can be reversed."
 msgstr "Numai DVI postat poate fi inversat."
 
@@ -455,7 +460,6 @@ msgstr "TVA DVI"
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_account_bank_statement_line__l10n_ro_dvi_ids
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_account_move__l10n_ro_dvi_ids
-#: model:ir.model.fields,field_description:l10n_ro_dvi.field_account_payment__l10n_ro_dvi_ids
 msgid "Romania - DVI's"
 msgstr "DVI-uri"
 
@@ -478,7 +482,7 @@ msgstr "DVI"
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi__state
 msgid "Status"
-msgstr "Status"
+msgstr "Stare"
 
 #. module: l10n_ro_dvi
 #: model:ir.model,name:l10n_ro_dvi.model_stock_landed_cost
@@ -504,7 +508,6 @@ msgstr ""
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
-#, python-format
 msgid "The product Custom Duty not found"
 msgstr "Produsul Taxă vamală nu este găsit"
 
@@ -540,14 +543,14 @@ msgid "Total Tax Value"
 msgstr "Total valoare TVA"
 
 #. module: l10n_ro_dvi
+#: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__product_uom_id
+msgid "Unit"
+msgstr ""
+
+#. module: l10n_ro_dvi
 #: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__price_unit
 msgid "Unit Price"
 msgstr "Preț unitar"
-
-#. module: l10n_ro_dvi
-#: model:ir.model.fields,field_description:l10n_ro_dvi.field_l10n_ro_account_dvi_line__product_uom_id
-msgid "Unit of Measure"
-msgstr "Unitate de măsură"
 
 #. module: l10n_ro_dvi
 #: model:ir.model.fields,help:l10n_ro_dvi.field_l10n_ro_account_dvi__currency_id
@@ -568,14 +571,13 @@ msgstr "Valoarea TVA, calculată din valoarea de bază a facturii și vamă."
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
-#, python-format
 msgid "VAT paid at customs"
 msgstr "TVA plătit în vamă"
 
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
-#, fuzzy, python-format
+#, fuzzy
 msgid "VAT paid at customs expense"
 msgstr "TVA plătit în vamă"
 
@@ -622,28 +624,24 @@ msgstr "Istoricul comunicării site-ului"
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/l10n_ro_account_dvi.py:0
-#, python-format
 msgid "You can only post DVI from 'draft' state."
 msgstr "Puteți posta DVI numai din statusul „ciornă”."
 
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/stock_landed_cost.py:0
-#, python-format
 msgid "You cannot create a DVI landed cost without reference to an invoice."
 msgstr "Nu puteți crea un DVI fără referire la o factură."
 
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/account_invoice.py:0
-#, python-format
 msgid "You do not have created DVI's for this invoice"
 msgstr "Nu ați creat DVI-uri pentru această factură"
 
 #. module: l10n_ro_dvi
 #. odoo-python
 #: code:addons/l10n_ro_dvi/models/l10n_ro_account_dvi.py:0
-#, python-format
 msgid "You do not have created landed costs for this DVI"
 msgstr "Nu ați creat costuri de repartizare pentru acest DVI"
 
@@ -671,9 +669,14 @@ msgstr "taxă calculată din custom_duty_value"
 msgid "taken from dvi if exists"
 msgstr "luat din DVI dacă există"
 
-#, fuzzy
-#~ msgid "Subtotal"
-#~ msgstr "Subtotal"
+#~ msgid "Unit of Measure"
+#~ msgstr "Unitate de măsură"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Ultima modificare pe"
+
+#~ msgid "Main Attachment"
+#~ msgstr "Atașamentul principal"
 
 #~ msgid ""
 #~ "Product type service with l10n_ro_custom_commission checked (in purchase "

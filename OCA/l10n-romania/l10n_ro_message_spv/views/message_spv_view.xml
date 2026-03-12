@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
-
     <record id="view_l10n_ro_message_spv_tree" model="ir.ui.view">
-        <field name="name">l10n.ro.message.spv.tree</field>
+        <field name="name">l10n.ro.message.spv.list</field>
         <field name="model">l10n.ro.message.spv</field>
-        <field name="type">tree</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree js_class="message_spv_tree" sample="1" create="0">
+            <list sample="1" create="0">
                 <header>
+                    <button
+                        name="refresh"
+                        string="Refresh"
+                        type="object"
+                        icon="fa-refresh"
+                        display="always"
+                    />
                     <button name="download_from_spv" string="Download" type="object" />
                     <button
                         name="get_invoice_from_move"
@@ -21,7 +26,6 @@
                         type="object"
                     />
                     <button name="show_invoice" string="Show Invoice" type="object" />
-
                 </header>
 
                 <field name="name" />
@@ -49,7 +53,7 @@
                     decoration-info="state == 'downloaded'"
                     decoration-primary="state == 'invoice'"
                 />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -70,7 +74,7 @@
                         name="create_invoice"
                         string="Create Invoice"
                         type="object"
-                        attrs="{'invisible': [('message_type', '!=', 'in_invoice')]}"
+                        invisible="message_type not in ('in_invoice','in_receipt')"
                     />
 
                     <button name="render_anaf_pdf" string="Render PDF" type="object" />
@@ -99,7 +103,6 @@
                             <field name="currency_id" invisible="1" />
                             <field
                                 name="amount"
-                                sum="1"
                                 decoration-danger="invoice_amount and amount != invoice_amount"
                             />
                             <field name="invoice_amount" invisible="1" />
@@ -110,7 +113,6 @@
                                 decoration-info="state == 'downloaded'"
                                 decoration-primary="state == 'invoice'"
                             />
-
                         </group>
 
                         <group string="Files">
@@ -121,7 +123,7 @@
                                     name="action_download_attachment"
                                     string="Download"
                                     type="object"
-                                    attrs="{'invisible': [('attachment_id', '==', False)]}"
+                                    invisible="not attachment_id"
                                 />
                             </div>
                             <label for="attachment_xml_id" />
@@ -131,7 +133,7 @@
                                     name="action_download_xml"
                                     string="Download"
                                     type="object"
-                                    attrs="{'invisible': [('attachment_xml_id', '==', False)]}"
+                                    invisible="not attachment_xml_id"
                                 />
                             </div>
                             <label for="attachment_anaf_pdf_id" />
@@ -141,7 +143,7 @@
                                     name="action_download_anaf_pdf"
                                     string="Download"
                                     type="object"
-                                    attrs="{'invisible': [('attachment_anaf_pdf_id', '==', False)]}"
+                                    invisible="not attachment_anaf_pdf_id"
                                 />
                             </div>
 
@@ -152,26 +154,19 @@
                                     name="action_download_embedded_pdf"
                                     string="Download"
                                     type="object"
-                                    attrs="{'invisible': [('attachment_embedded_pdf_id', '==', False)]}"
+                                    invisible="not attachment_embedded_pdf_id"
                                 />
                             </div>
                         </group>
                         <group string="Errors and Info">
-                            <field
-                                name="error"
-                                attrs="{'invisible': [('error', '==', False)]}"
-                            />
-                            <field
-                                name="message"
-                                attrs="{'invisible': [('message', '==', False)]}"
-                            />
+                            <field name="error" invisible="not error" />
+                            <field name="message" invisible="not message" />
                         </group>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
-
 
     <record id="view_l10n_ro_message_spv_search" model="ir.ui.view">
         <field name="name">l10n.ro.message.spv.search</field>
@@ -245,11 +240,10 @@
         </field>
     </record>
 
-
     <record id="action_l10n_ro_message_spv" model="ir.actions.act_window">
         <field name="name">Messages SPV</field>
         <field name="res_model">l10n.ro.message.spv</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem
@@ -264,5 +258,4 @@
         parent="menu_l10n_ro_spv"
         action="action_l10n_ro_message_spv"
     />
-
 </odoo>

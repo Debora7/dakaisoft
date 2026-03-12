@@ -11,11 +11,9 @@ class ResCompany(models.Model):
     # de eliminat acest camp si de utilizat account_fiscal_country_id.code == 'RO'
     l10n_ro_accounting = fields.Boolean(
         string="Romania - Use Romanian Accounting",
+        default=True,
         compute="_compute_l10n_ro_accounting",
         store=True,
-    )
-    anglo_saxon_accounting = fields.Boolean(
-        string="Use anglo-saxon accounting", default=True
     )
     l10n_ro_share_capital = fields.Float(
         string="Romania - Share Capital", digits="Account", default=200
@@ -105,8 +103,7 @@ class ResCompany(models.Model):
         "product.product",
         string="Romania - Customs Duty Landed Cost Product",
         domain="[('type', '=', 'service')]",
-        help="This product will be used in create the DVI landed cost"
-        "for the duty tax",
+        help="This product will be used in create the DVI landed costfor the duty tax",
     )
     l10n_ro_property_customs_commission_product_id = fields.Many2one(
         "product.product",
@@ -116,39 +113,19 @@ class ResCompany(models.Model):
         "for the duty commissions.",
     )
 
-    l10n_ro_stock_account_svl_lot_allocation = fields.Boolean(
-        string="Romania - Stock Accounting Valuation Lot/Serial allocation",
-        help="If this field is checked and the company use Romanian Accounting,"
-        "the value used for stock out operations will be the value recorded at the "
-        "reception of the lot/serial, ignoring FIFO rule;"
-        "If this field is NOT checked and the company use Romanian Accounting,"
-        "the value used for stock out operations will be the value provided by FIFO rule, "
-        "applied strictly on a location level (including its children)",
-    )
-
     l10n_ro_restrict_stock_move_date_last_month = fields.Boolean(
         string="Restrict Stock Move Date Last Month",
-        help="Restrict stock move posting with at most one month ago.",
-    )
-    l10n_ro_restrict_stock_move_date_future = fields.Boolean(
-        string="Restrict Stock Move Date Future",
-        help="Restrict stock move posting with future date.",
+        help="Restrict stock move posting from 1st of previous month till today. "
+        "Future dates are not allowed.",
     )
     l10n_ro_nondeductible_account_id = fields.Many2one(
         "account.account",
         string="Romania - Non Deductible Expense Account",
-        help="This account will be used as the default non deductible expense account from "
-        "tax repartition lines marked as not deductible. If the line account does not have "
+        help="This account will be used as the default non deductible "
+        "expense account from "
+        "tax repartition lines marked as not deductible."
+        " If the line account does not have "
         "a non deductible account set, this account will be used.",
-    )
-
-    l10n_ro_print_delivery_price = fields.Boolean(
-        string="Print Delivery Slip Prices and Totals",
-        help="For delivery order to customer or intern transfer order, this variable sets "
-        "whether if the unit price and total are printed on the delivery slip"
-        "Default is enabled, the system will automatically print these values"
-        "on the delivery note.",
-        default=True,
     )
 
     def _check_is_l10n_ro_record(self, company=False):
@@ -158,7 +135,7 @@ class ResCompany(models.Model):
             company = self.browse(company)
         return company.l10n_ro_accounting
 
-    @api.depends("account_fiscal_country_id.code")
+    @api.depends("chart_template")
     def _compute_l10n_ro_accounting(self):
         for company in self:
-            company.l10n_ro_accounting = company.account_fiscal_country_id.code == "RO"
+            company.l10n_ro_accounting = company.chart_template == "ro"

@@ -11,11 +11,11 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 @tagged("post_install", "-at_install")
 class TestMT940BankStatementImport(AccountTestInvoicingCommon):
     @classmethod
+    @AccountTestInvoicingCommon.setup_country("ro")
     def setUpClass(cls):
-        ro_template_ref = "l10n_ro.ro_chart_template"
-        super(TestMT940BankStatementImport, cls).setUpClass(
-            chart_template_ref=ro_template_ref
-        )
+        super().setUpClass()
+        cls.env.company.anglo_saxon_accounting = True
+        cls.env.company.l10n_ro_accounting = True
 
     def create_partner_bank(self, bank_acc):
         bank = self.env["res.partner.bank"].create(

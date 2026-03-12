@@ -5,6 +5,8 @@
 
 from odoo import fields, models
 
+from odoo.addons.account.models.product import ACCOUNT_DOMAIN
+
 
 class StockLocation(models.Model):
     _inherit = "stock.location"
@@ -13,8 +15,7 @@ class StockLocation(models.Model):
         "account.account",
         company_dependent=True,
         string="Income Account",
-        domain="['&', ('deprecated', '=', False),"
-        "('company_id', '=', current_company_id)]",
+        domain=ACCOUNT_DOMAIN,
         help="This account will overwrite the income accounts from product "
         "or category.",
     )
@@ -22,16 +23,26 @@ class StockLocation(models.Model):
         "account.account",
         company_dependent=True,
         string="Expense Account",
-        domain="['&', ('deprecated', '=', False),"
-        "('company_id', '=', current_company_id)]",
+        domain=ACCOUNT_DOMAIN,
         help="This account will overwrite the expense accounts from product "
         "or category.",
     )
 
     l10n_ro_property_stock_valuation_account_id = fields.Many2one(
         "account.account",
-        string="Stock Valuation Account",
+        string="Stock Valuation Account Romania",
         company_dependent=True,
-        domain="[('company_id', '=', current_company_id),"
-        "('deprecated', '=', False)]",
+        domain=ACCOUNT_DOMAIN,
     )
+
+    def propagate_account(self):
+        for location in self:
+            children = self.search([("id", "child_of", [location.id])])
+            if not children:
+                continue
+            values = {
+                "l10n_ro_property_account_income_location_id": location.l10n_ro_property_account_income_location_id.id,  # noqa
+                "l10n_ro_property_account_expense_location_id": location.l10n_ro_property_account_expense_location_id.id,  # noqa
+                "l10n_ro_property_stock_valuation_account_id": location.l10n_ro_property_stock_valuation_account_id.id,  # noqa
+            }
+            children.write(values)

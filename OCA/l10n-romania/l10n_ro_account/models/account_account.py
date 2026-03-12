@@ -8,7 +8,7 @@ class Account(models.Model):
     _inherit = "account.account"
 
     l10n_ro_external_code = fields.Char(
-        compute="_compute_l10n_ro_external_code", store=True
+        compute="_compute_l10n_ro_external_code", store=False
     )
 
     @api.depends("code")
@@ -36,19 +36,19 @@ class Account(models.Model):
         cont = self.code[:4]
         while cont and cont[-1] == "0":
             cont = cont[:-1]
-
-        analytic = int(self.code[4:])
-        if analytic:
-            cont += "." + str(analytic)
+        if self.code[4:]:
+            analytic = int(self.code[4:])
+            if analytic:
+                cont += "." + str(analytic)
         return cont
 
-    def name_get(self):
-        result = []
+    def _compute_display_name(self):
         rest = self
         for account in self:
-            if account.company_id.l10n_ro_accounting:
+            if self.env.company.l10n_ro_accounting:
                 code = account.l10n_ro_external_code or account.code
-                name = code + " " + account.name
-                result.append((account.id, name))
-                rest -= account
-        return result + super(Account, rest).name_get()
+                if code and account.name:
+                    name = code + " " + account.name
+                    account.display_name = name
+                    rest -= account
+        return super(Account, rest)._compute_display_name()

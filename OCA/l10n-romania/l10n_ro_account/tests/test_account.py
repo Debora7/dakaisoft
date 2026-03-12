@@ -2,20 +2,12 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 
-from odoo.tests import tagged
-
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tests.common import TransactionCase
 
 
-@tagged("post_install", "-at_install")
-class TestAccount(AccountTestInvoicingCommon):
-    @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        ro_template_ref = "l10n_ro.ro_chart_template"
-        super().setUpClass(chart_template_ref=ro_template_ref)
-
+class TestAccount(TransactionCase):
     def setUp(self):
-        super(TestAccount, self).setUp()
+        super().setUp()
         self.env.company.l10n_ro_accounting = True
 
         self.account = self.env["account.account"].create(
@@ -34,5 +26,5 @@ class TestAccount(AccountTestInvoicingCommon):
         self.assertEqual(account_id, self.account.id)
 
     def test_name_get(self):
-        name = self.account.name_get()
-        self.assertEqual(name, [(self.account.id, "301.1 Test account")])
+        name = self.account.display_name
+        self.assertEqual(name, "301.1 Test account")

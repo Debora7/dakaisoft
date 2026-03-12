@@ -17,11 +17,9 @@ class AccountMove(models.Model):
         Romanian law specify that the VAT on payment is applied only
         for internal invoices (National or not specified fiscal position)
         """
-        result = super(AccountMove, self)._onchange_partner_id()
+        result = super()._onchange_partner_id()
         if self.is_l10n_ro_record:
-            fp_model = self.env["account.fiscal.position"]
-            vatp = False
-            ctx = dict(self._context)
+            ctx = dict(self.env.context)
             company = self.company_id
             partner = (
                 self.env["res.partner"]._find_accounting_partner(self.partner_id)
@@ -35,20 +33,14 @@ class AccountMove(models.Model):
             if not vatp and self.is_purchase_document() and partner:
                 vatp = partner.with_context(**ctx)._check_vat_on_payment()
             if vatp and self.move_type != "entry":
-                fptvainc = fp_model.search(
-                    [
-                        ("name", "ilike", "Regim TVA la Incasare"),
-                        ("company_id", "=", self.env.company.id),
-                    ],
-                    limit=1,
-                )
+                fptvainc = company.l10n_ro_property_vat_on_payment_position_id
                 if fptvainc:
                     self.fiscal_position_id = fptvainc
         return result
 
     @api.depends("line_ids.account_id.account_type")
     def _compute_always_tax_exigible(self):
-        self_ro = self.filtered(lambda l: l.is_l10n_ro_record)
+        self_ro = self.filtered(lambda line: line.is_l10n_ro_record)
         self_no_ro = self - self_ro
         for record in self_ro:
             record.always_tax_exigible = (

@@ -1,7 +1,7 @@
 {
     "name": "Partner licence",
     "description": "",
-    "version": "16.0.0.4",
+    "version": "19.0.0.0",
     "website": "https://dakai.ro",
     "author": "Dakai SOFT SRL",
     "maintainers": ["adrian-dks"],
@@ -10,6 +10,7 @@
     "data": [
         "security/ir.model.access.csv",
         "views/customer_licence.xml",
+        "data/data.xml",
     ],
     "category": "Licence",
     "depends": ["sale_management"],

@@ -1,4 +1,5 @@
 from odoo import api, models, fields, _
+from datetime import datetime, date
 
 class Contract(models.Model):
     _inherit = 'smart.contract'
@@ -16,6 +17,16 @@ class Contract(models.Model):
         if self.document_type=='gdpr':
             res = True
         return res
+    
+    def set_name(self):
+        super().set_name()
+        for s in self:
+            date = datetime.now().date().strftime("%Y-%m-%d")
+            if s.document_type == 'gdpr':
+                name = _("GDPR %s") % date
+                if self.nr_document:
+                    name = _("GDPR %s for %s") % (self.nr_document, self.parent_id.nr_document)
+                s.name = name
         
 
 class RegulatorNumere(models.Model):

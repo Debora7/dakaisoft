@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_config_settings_form_inherit_l10n_ro_edi" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.l10n.ro.edi</field>
+        <field name="model">res.config.settings</field>
+        <field
+            name="inherit_id"
+            ref="l10n_ro_efactura.res_config_settings_form_inherit_l10n_ro_edi"
+        />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[2]"
+                position="after"
+            >
+                <div class="row">
+                    <label
+                        for="l10n_ro_edi_provider_id"
+                        class="col-lg-3 o_light_label"
+                    />
+                    <field name="l10n_ro_edi_provider_id" />
+                </div>
+                <div class="row" invisible="not l10n_ro_edi_provider_id">
+                    <label
+                        for="l10n_ro_edi_licence_status"
+                        class="col-lg-3 o_light_label"
+                    />
+                    <field name="l10n_ro_edi_licence_status" readonly="0" />
+                </div>
+                <div class="row" invisible="not l10n_ro_edi_provider_id">
+                    <label
+                        for="l10n_ro_edi_provider_licence"
+                        class="col-lg-3 o_light_label"
+                    />
+                    <field name="l10n_ro_edi_provider_licence" readonly="1" />
+                </div>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[2]"
+                position="after"
+            >
+                <div
+                    class="text-muted oe_inline mb-3"
+                    invisible="not l10n_ro_edi_provider_id"
+                >
+                    <div class="mb-1">
+                        <div
+                        >Data needed to generate token for sending RO-CIUS to Romanian government</div>
+                        <div>
+                            To benefit from this feature, you must have a digital signature USB token from
+                            Romania connected with an ANAF account
+                        </div>
+                    </div>
+                    <ul>
+                        <li>
+                            First, you need to get a license from your provider. For this purpose, click on the button below "Get ANAF License".
+                            Once the provider will confirm the license, you will be able to generate the token.
+                        </li>
+                        <li
+                        >With the digital signature USB token inserted, generate the token using the button below</li>
+                    </ul>
+                </div>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[2]"
+                position="attributes"
+            >
+                <attribute name="invisible">l10n_ro_edi_provider_id</attribute>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[8]"
+                position="attributes"
+            >
+                <attribute name="invisible">l10n_ro_edi_provider_id</attribute>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[9]"
+                position="attributes"
+            >
+                <attribute name="invisible">l10n_ro_edi_provider_id</attribute>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[14]"
+                position="attributes"
+            >
+                <attribute
+                    name="invisible"
+                >l10n_ro_edi_licence_status != 'confirmed_licence' or (l10n_ro_edi_access_token and l10n_ro_edi_licence_status == 'confirmed_licence')</attribute>
+            </xpath>
+            <xpath
+                expr="//block[@id='l10n_ro_edi_settings']/div/div/div[13]"
+                position="after"
+            >
+                <div
+                    class="my-3"
+                    invisible="l10n_ro_edi_provider_id and l10n_ro_edi_licence_status != 'draft'"
+                >
+                   <button
+                        name="get_anaf_licence"
+                        type="object"
+                        string="Get ANAF License"
+                        class="btn btn-primary"
+                    />
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

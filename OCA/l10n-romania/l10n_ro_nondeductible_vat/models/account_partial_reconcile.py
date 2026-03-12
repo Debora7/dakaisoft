@@ -11,12 +11,12 @@ class AccountPartialReconcile(models.Model):
         )
         if tax_line.company_id.l10n_ro_accounting:
             if (
-                tax_line.tax_repartition_line_id.l10n_ro_skip_cash_basis_account_switch
+                tax_line.tax_repartition_line_id.repartition_type == "base"
                 and tax_line.company_id.account_cash_basis_base_account_id
             ):
-                vals[
-                    "account_id"
-                ] = tax_line.company_id.account_cash_basis_base_account_id.id
+                vals["account_id"] = (
+                    tax_line.company_id.account_cash_basis_base_account_id.id
+                )
         return vals
 
     @api.model
@@ -26,10 +26,10 @@ class AccountPartialReconcile(models.Model):
         )
         if tax_line.company_id.l10n_ro_accounting:
             if (
-                tax_line.tax_repartition_line_id.l10n_ro_skip_cash_basis_account_switch
+                tax_line.tax_repartition_line_id.repartition_type == "base"
                 and tax_line.company_id.account_cash_basis_base_account_id
             ):
-                vals[
-                    "account_id"
-                ] = tax_line.company_id.account_cash_basis_base_account_id.id
+                vals["account_id"] = (
+                    tax_line.company_id.account_cash_basis_base_account_id.id
+                )
         return vals

@@ -3,14 +3,15 @@
 {
     "name": "Romania - Stock",
     "category": "Localization",
+    "countries": ["ro"],
     "depends": ["stock", "l10n_ro_config"],
     "data": [
+        "data/stock_data.xml",
         "views/stock_warehouse_view.xml",
-        "views/stock_location_view.xml",
         "views/product_template_view.xml",
     ],
     "license": "AGPL-3",
-    "version": "16.0.0.4.0",
+    "version": "19.0.0.4.0",
     "author": "NextERP Romania,"
     "Dorin Hongu,"
     "Forest and Biomass Romania,"

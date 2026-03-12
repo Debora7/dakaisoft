@@ -4,19 +4,19 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 11.0\n"
+"Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-19 11:55+0000\n"
-"PO-Revision-Date: 2024-05-22 12:59+0300\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
+"PO-Revision-Date: 2024-06-11 10:52+0000\n"
+"Last-Translator: Larisa Cuciureanu <larisa.cuciureanu@nexterp.ro>\n"
 "Language-Team: \n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Weblate 4.17\n"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model_terms:ir.ui.view,arch_db:l10n_ro_partner_create_by_vat.view_partner_anaf_status_form
@@ -26,24 +26,18 @@ msgstr "ANAF - Istoric state Activ"
 #. module: l10n_ro_partner_create_by_vat
 #: model_terms:ir.ui.view,arch_db:l10n_ro_partner_create_by_vat.view_partner_anaf_status_form
 msgid "ANAF - VAT Subjected History"
-msgstr "ANAF - Istoric Plătitor TVA"
-
-#. module: l10n_ro_partner_create_by_vat
-#: model_terms:ir.ui.view,arch_db:l10n_ro_partner_create_by_vat.view_partner_anaf_status_form
-msgid "ANAF History"
-msgstr "Istoric ANAF"
+msgstr "ANAF - Istoric Platitor TVA"
 
 #. module: l10n_ro_partner_create_by_vat
 #. odoo-python
 #: code:addons/l10n_ro_partner_create_by_vat/models/res_partner.py:0
-#, python-format
-msgid "ANAF Webservice not working. Exception=%s."
-msgstr "Serviciul web ANAF nu funcționează. Excepție=%s."
+msgid "ANAF Webservice not working. Exception raised: %(error)s"
+msgstr ""
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__act
 msgid "Act autorizare"
-msgstr "Act autorizare"
+msgstr "Act de autorizare"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__active_status
@@ -53,25 +47,27 @@ msgstr "Stare Ativ"
 #. module: l10n_ro_partner_create_by_vat
 #. odoo-python
 #: code:addons/l10n_ro_partner_create_by_vat/models/res_partner.py:0
-#, python-format
-msgid "Anaf didn't find any company with VAT=%s !"
-msgstr "ANAF nu a găsit nici o companie cu codul TVA=%s!"
+msgid "Anaf didn't find any company with VAT=%(vat)s !"
+msgstr ""
 
 #. module: l10n_ro_partner_create_by_vat
 #. odoo-python
 #: code:addons/l10n_ro_partner_create_by_vat/models/res_partner.py:0
-#, python-format
 msgid ""
 "Anaf request error: \n"
 "response=%(response)s \n"
 "reason=%(reason)s \n"
 "text=%(text)s"
 msgstr ""
+"Eroare de solicitare Anaf: \n"
+"răspuns=%(response)s \n"
+"motiv=%(reason)s \n"
+"text=%(text)s"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model,name:l10n_ro_partner_create_by_vat.model_res_partner
 msgid "Contact"
-msgstr "Contact"
+msgstr "a lua legatura"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__create_uid
@@ -86,19 +82,14 @@ msgid "Created on"
 msgstr "Creeat in"
 
 #. module: l10n_ro_partner_create_by_vat
-#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__date
-#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__date
-msgid "Date"
-msgstr "Data"
-
-#. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__delete_date
 msgid "Delete Date"
-msgstr "Dată ștergere"
+msgstr "Data Stergere"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__display_name
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__display_name
+#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_res_partner__display_name
 msgid "Display Name"
 msgstr "Nume afișat"
 
@@ -106,31 +97,26 @@ msgstr "Nume afișat"
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__end_date
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__end_date
 msgid "End Date"
-msgstr "Dată de sfârșit"
+msgstr "Data de sfârșit"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__id
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__id
+#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_res_partner__id
 msgid "ID"
-msgstr "ID"
-
-#. module: l10n_ro_partner_create_by_vat
-#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva____last_update
-#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status____last_update
-msgid "Last Modified on"
-msgstr "Ultima modificare la"
+msgstr "Identificare"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__write_uid
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__write_uid
 msgid "Last Updated by"
-msgstr "Ultima actualizare de"
+msgstr "Ultima actualizare de către"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__write_date
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__write_date
 msgid "Last Updated on"
-msgstr "Ultima actualizare la"
+msgstr "Ultima actualizare pe"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__message
@@ -166,7 +152,7 @@ msgstr "Istoric ANAF privind platitor de TVA"
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__publish_date
 msgid "Publish Date"
-msgstr "Data publicării"
+msgstr "Data publicarii"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_res_partner__l10n_ro_vat_subjected_anaf_line_ids
@@ -193,40 +179,30 @@ msgid "Start Date"
 msgstr "Data de inceput"
 
 #. module: l10n_ro_partner_create_by_vat
-#: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__date
-#: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__date
-msgid "The date for ANAF interogation."
-msgstr "Data interogarii ANAF."
-
-#. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_res_partner__l10n_ro_old_name
 #: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_res_users__l10n_ro_old_name
 msgid ""
-"To be completed manually with previous name of the company in case on change."
-"If the field in completed, when fetching the datas from ANAF website,if the "
-"name received is the old name set, than the partner will not be updated."
+"To be completed manually with previous name of the company in case on "
+"change.If the field in completed, when fetching the datas from ANAF "
+"website,if the name received is the old name set, than the partner will not "
+"be updated."
 msgstr ""
-"Să fie completat manual cu numele anterior al companiei în cazul unui "
-"schimb. Dacă acest câmp este completat, atunci când se preiau datele de pe "
-"site-ul ANAF, dacă numele primit este numele vechi setat, atunci partenerul "
+"Sa fie completat manual cu numele anterior al companiei in cazul unui "
+"schimb. Daca acest camp este completat, atunci cand se preiau datele de pe "
+"site-ul ANAF, daca numele primit este numele vechi setat, atunci partenerul "
 "nu va fi actualizat."
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__vat_number
 #: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__vat_number
 msgid "VAT Number without country code."
-msgstr "Codul de TVA fără codul țării."
+msgstr "Codul de TVA fara codul tarii."
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__vat_number
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_status__vat_number
 msgid "Vat Number"
 msgstr "Cod TVA"
-
-#. module: l10n_ro_partner_create_by_vat
-#: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__vat_subjected
-msgid "Vat Subjected"
-msgstr "Plătitor TVA"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,field_description:l10n_ro_partner_create_by_vat.field_l10n_ro_res_partner_anaf_scptva__year_date
@@ -239,8 +215,8 @@ msgstr "Anul - Data"
 msgid ""
 "will add entries only if differs as scpTVA from previos or after entries"
 msgstr ""
-"Vor adăuga intrări numai dacă TVA este diferit față de intrarea anterioară "
-"sau după intrări"
+"Vor adăuga intrări numai dacă scpTVA este diferit față de intrarea "
+"anterioară sau după intrări"
 
 #. module: l10n_ro_partner_create_by_vat
 #: model:ir.model.fields,help:l10n_ro_partner_create_by_vat.field_res_partner__l10n_ro_active_anaf_line_ids
@@ -249,12 +225,26 @@ msgid ""
 "will add entries only if differs as statusInactivi from previos or after "
 "entries"
 msgstr ""
-"vor adăuga intrări numai dacă status inactivi este diferit față de intrarea "
+"Vor adăuga intrări numai dacă statusInactivi este diferit față de intrarea "
 "anterioară sau după intrări"
 
-#, python-format
-#~ msgid "ANAF Webservice not working. Exeption=%s."
-#~ msgstr "Eroare la serviciul web ANAF. Exceptie=%s."
+#~ msgid "ANAF Webservice not working. Exception=%s."
+#~ msgstr "Serviciul web ANAF nu funcționează. Excepție=%s."
 
-#~ msgid "VAT Legal Statement"
-#~ msgstr "Plătitor de TVA"
+#~ msgid "Anaf didn't find any company with VAT=%s !"
+#~ msgstr "ANAF nu a gasit nici o companie cu codul TVA=%s!"
+
+#~ msgid "Date"
+#~ msgstr "Data"
+
+#~ msgid "The date for ANAF interogation."
+#~ msgstr "Data interogarii ANAF."
+
+#~ msgid "Vat Subjected"
+#~ msgstr "Platitor TVA"
+
+#~ msgid "ANAF History"
+#~ msgstr "Istoric ANAF"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Ultima modificare la"

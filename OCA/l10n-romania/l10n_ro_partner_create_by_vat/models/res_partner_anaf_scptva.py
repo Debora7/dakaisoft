@@ -7,19 +7,14 @@ from odoo import fields, models
 class L10nROResPartnerAnafScptva(models.Model):
     _name = "l10n.ro.res.partner.anaf.scptva"
     _description = "Partner Vat Subjected ANAF History"
-    _order = "date desc"
+    _order = "start_date desc"
 
     partner_id = fields.Many2one("res.partner", ondelete="cascade")
     vat_number = fields.Char(help="VAT Number without country code.", index=True)
-    date = fields.Date(
-        index=True,
-        help="The date for ANAF interogation.",
-    )
     start_date = fields.Date()
     end_date = fields.Date()
     year_date = fields.Date()
     message = fields.Char()
-    vat_subjected = fields.Boolean()
 
     # def create(self, vals):
     #     res = super().create(vals)
@@ -33,7 +28,7 @@ class L10nROResPartnerAnafScptva(models.Model):
     def write(self, vals):
         res = super().write(vals)
         for record in self:
-            if record.vat_number:
+            if record.vat_number and not record.partner_id:
                 record.partner_id = self.env["res.partner"].search(
                     [("l10n_ro_vat_number", "=", record.vat_number)]
                 )

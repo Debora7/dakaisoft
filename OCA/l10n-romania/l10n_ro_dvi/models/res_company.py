@@ -1,7 +1,7 @@
 # Copyright (C) 2022 NextERP Romania
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, fields, models
+from odoo import fields, models
 
 
 class ResCompany(models.Model):
@@ -22,15 +22,15 @@ class ResCompany(models.Model):
             account = self.env["account.account"].search(
                 [
                     ("code", "=", "446%"),
-                    ("company_id", "=", self.id),
+                    ("company_ids", "in", [self.id]),
                 ],
                 limit=1,
             )
 
             customs_duty_product = self.env["product.product"].create(
                 {
-                    "name": _("Custom Duty"),
-                    "categ_id": self.env.ref("product.product_category_all").id,
+                    "name": self.env._("Custom Duty"),
+                    "categ_id": self.env.ref("product.product_category_services").id,
                     "type": "service",
                     "invoice_policy": "order",
                     "landed_cost_ok": True,
@@ -50,15 +50,15 @@ class ResCompany(models.Model):
             account = self.env["account.account"].search(
                 [
                     ("code", "=", "447%"),
-                    ("company_id", "=", self.id),
+                    ("company_ids", "in", [self.id]),
                 ],
                 limit=1,
             )
 
             customs_commission_product = self.env["product.product"].create(
                 {
-                    "name": _("Customs Commission"),
-                    "categ_id": self.env.ref("product.product_category_all").id,
+                    "name": self.env._("Customs Commission"),
+                    "categ_id": self.env.ref("product.product_category_services").id,
                     "type": "service",
                     "invoice_policy": "order",
                     "landed_cost_ok": True,
@@ -80,17 +80,17 @@ class ResCompany(models.Model):
             account = self.env["account.account"].search(
                 [
                     ("code", "=", "658820"),
-                    ("company_id", "=", self.id),
+                    ("company_ids", "in", [self.id]),
                 ],
                 limit=1,
             )
             vat_price_diff_product = self.env["product.product"].create(
                 {
                     "name": "Vat price difference",
-                    "categ_id": self.env.ref("product.product_category_all").id,
+                    "categ_id": self.env.ref("product.product_category_services").id,
                     "type": "service",
                     "invoice_policy": "order",
-                    "property_account_expense_id": account if account else False,
+                    "property_account_expense_id": account.id if account else False,
                     "company_id": self.id,
                 }
             )

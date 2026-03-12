@@ -1,8 +1,6 @@
 from . import common
 
-from . import test_product
-from . import test_inventory
-from . import test_consum
-from . import test_purchase
-from . import test_sale
-from . import test_dropshiping
+from . import test_ro_stock_fifo
+from . import test_ro_stock_avg
+from . import test_stock_fifo_internal_transfer
+from . import test_stock_location

@@ -3,6 +3,7 @@
 
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class Partner(models.Model):
@@ -20,12 +21,21 @@ class Partner(models.Model):
     @api.onchange("zip")
     def onchange_zip(self):
         if self.zip and self.country_id.code == "RO":
+            if len(self.zip) == 5:
+                self.zip = "0" + self.zip
+            state_b = self.env.ref("base.RO_B")
+
             domain = [
                 ("l10n_ro_prefix_zip", "=", self.zip[:2]),
                 ("country_id", "=", self.country_id.id),
             ]
             state = self.env["res.country.state"].search(domain, limit=1)
             if state:
+                if self.state_id and self.state_id != state:
+                    raise UserError(
+                        self.env._("The state {name} doesn't match the zip code"),
+                        name=state.name,
+                    )
                 self.state_id = state
 
             if self.zip[:2] in ["01", "02", "03", "04", "05", "06"]:
@@ -38,6 +48,15 @@ class Partner(models.Model):
                     "06": "l10n_ro_city.RO_179196",  # Sector 6
                 }
                 city = self.env.ref(mapping[self.zip[:2]])
+                if self.state_id != state_b:
+                    raise UserError(
+                        self.env._(
+                            "The city {city} doesn't match the"
+                            " zip code and the state {state}"
+                        ),
+                        city=city.name,
+                        state=state.name,
+                    )
             else:
                 domain = [
                     ("zipcode", "=", self.zip),
@@ -46,12 +65,21 @@ class Partner(models.Model):
                 city = self.env["res.city"].search(domain, limit=1)
 
             if city:
-                self.city_id = city
+                self.write(
+                    {
+                        "city_id": city.id,
+                        "city": city.name,
+                        "state_id": city.state_id.id,
+                    }
+                )
 
     @api.onchange("city_id")
     def _onchange_city_id(self):
         backup_zip = self.zip
+        backup_city = self.city
         res = super()._onchange_city_id()
         if not self.zip and backup_zip:
             self.zip = backup_zip
+        if not self.city and backup_city:
+            self.city = backup_city
         return res

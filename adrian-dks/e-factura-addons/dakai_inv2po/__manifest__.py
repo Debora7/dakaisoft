@@ -2,7 +2,7 @@
 {
   'name':'Dakai inv2po',
   'description': "",
-  'version':'16.0.0.1',
+  'version':'19.0.0.0',
   'author':'Dakai SOFT',
   'website': 'https://dakai.ro',
   'author': 'Dakai SOFT SRL',
@@ -10,7 +10,7 @@
   'license': 'OPL-1',
   'installable': True,
   'data': [
-    'views/account_invoice.xml',
+      'views/account_invoice.xml',
     #'security/ir.model.access.csv',
     ],
   'category': 'Accounting',

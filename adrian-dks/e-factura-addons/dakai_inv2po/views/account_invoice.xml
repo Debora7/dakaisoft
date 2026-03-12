@@ -11,7 +11,7 @@
             	<field name="move_type" invisible="1"/>
                 <field name="state" invisible="1"/>
             	<field name="purchase_order_count" invisible="1"/>
-            	<button type="object" class="oe_highlight" name="createPo" string="Create RFQ" attrs="{'invisible':['|','|',('move_type','!=','in_invoice'),('purchase_order_count','>',0),('state','!=','posted')]}"/>
+            	<button type="object" class="oe_highlight" name="createPo" string="Create RFQ" invisible="move_type != 'in_invoice' or purchase_order_count > 0 or state != 'posted'"/>
             </xpath>
         </field>
     </record>

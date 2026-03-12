@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="partner_anaf_authorize_company_form" model="ir.ui.view">
+        <field name="name">partner.anaf.authorize.company.form</field>
+        <field name="model">res.company</field>
+        <field
+            name="inherit_id"
+            ref="base.view_company_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="before">
+                <field name="provider_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

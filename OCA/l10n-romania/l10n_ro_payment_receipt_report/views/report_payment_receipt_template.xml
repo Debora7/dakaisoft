@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <template id="report_payment_receipt_document">
         <t t-call="web.external_layout">
             <t t-set="o" t-value="o.with_context(lang=lang)" />
@@ -34,23 +33,23 @@
 
                         <span t-if="o.payment_type=='inbound'">We received from:
                             <strong>
-                                <span t-field="o.partner_id.name" />
-                            </strong>
+                        <span t-field="o.partner_id.name" />
+                    </strong>
                             with address:
                         </span>
 
                         <span t-if="o.payment_type=='outbound'">We send to:
                             <strong>
-                                <span t-field="o.partner_id.name" />
-                            </strong>
+                        <span t-field="o.partner_id.name" />
+                    </strong>
                             with address:
                         </span>
 
 
                         <span
-                            t-field="o.partner_id"
-                            t-options='{"widget": "contact", "fields": ["address", ], "no_marker": True, "no_tag_br": True}'
-                        />
+                        t-field="o.partner_id"
+                        t-options='{"widget": "contact", "fields": ["address", ], "no_marker": True, "no_tag_br": True}'
+                    />
                         <t t-if="o.partner_id.vat">
                             <t t-esc="o.partner_id.country_id.vat_label or 'TIN'" />
                             <span t-field="o.partner_id.vat" />,
@@ -62,16 +61,16 @@
                         <br />
                         <span>amount of
                             <span
-                                t-field="o.amount"
-                                t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
-                            />
+                        t-field="o.amount"
+                        t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"
+                    />
                         </span>
                         (<span t-esc="o.currency_id.amount_to_text(o.amount)" />)
                         <br />
                         <span>for payment of:
                             <span
-                                t-esc="','.join(o.reconciled_invoice_ids.mapped('name'))"
-                            />
+                        t-esc="','.join(o.reconciled_invoice_ids.mapped('name'))"
+                    />
                         </span>
                         .
                     </div>
@@ -106,5 +105,4 @@
             </t>
         </t>
     </template>
-
 </odoo>

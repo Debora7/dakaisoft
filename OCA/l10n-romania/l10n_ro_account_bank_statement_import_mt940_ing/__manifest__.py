@@ -5,7 +5,7 @@
 
 {
     "name": "MT940 ING Format Bank Statements Import",
-    "version": "16.0.1.4.0",
+    "version": "19.0.0.2.0",
     "license": "AGPL-3",
     "author": "Terrabit,"
     "NextERP Romania SRL,"
