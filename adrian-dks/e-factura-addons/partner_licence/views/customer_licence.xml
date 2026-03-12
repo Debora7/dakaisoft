@@ -36,22 +36,22 @@
         <record id="res_partner_licence_tree" model="ir.ui.view">
             <field name="name">res.partner.licence Tree</field>
             <field name="model">res.partner.licence</field>
-            <field name="type">tree</field>
+            <field name="type">list</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name" />
                     <field name="partner_id" />
                     <field name="scope" />
                     <field name="licence" />
                     <field name="state" />
-                </tree>
+                </list>
             </field>
         </record>
 
         <record id="res_partner_licence_action" model="ir.actions.act_window">
             <field name="name">Customer Licences</field>
             <field name="res_model">res.partner.licence</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem
