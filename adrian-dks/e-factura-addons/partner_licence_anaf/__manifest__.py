@@ -14,6 +14,6 @@
         "data/data.xml",
     ],
     "category": "Licence for Anaf",
-    "depends": ["partner_licence", "l10n_ro_account_anaf_sync"],
+    "depends": ["partner_licence"],
     "external_dependencies": {"python": ["PyJWT"]},
 }
