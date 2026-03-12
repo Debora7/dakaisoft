@@ -1,0 +1,4 @@
+[submodule "adrian-dks/dakaisoft"]
+	path = adrian-dks/dakaisoft
+	url = git@github.com:adrian-dks/dakaisoft.git
+	branch = 19.0
