@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_l10n_ro_account_anaf_sync_tree" model="ir.ui.view">
+        <field name="name">l10n.ro.account.anaf.sync.tree</field>
+        <field name="model">l10n.ro.account.anaf.sync</field>
+        <field name="inherit_id" ref="l10n_ro_account_anaf_sync.view_l10n_ro_account_anaf_sync_tree" />
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='client_id']" position="replace" />
+            <xpath expr="//field[@name='client_token_valability']" position="replace" />
+            <xpath expr="//tree" position="inside">
+                <field name="provider_id" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_l10n_ro_account_anaf_sync_form" model="ir.ui.view">
+        <field name="name">l10n.ro.account.anaf.sync.form</field>
+        <field name="model">l10n.ro.account.anaf.sync</field>
+        <field name="inherit_id" ref="l10n_ro_account_anaf_sync.view_l10n_ro_account_anaf_sync_form" />
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='get_token_from_anaf_website']" position="attributes">
+                <attribute
+          name="attrs"
+        >{'invisible':['|',('access_token','not in',['', False]),('licence_status','!=','confirmed_licence')]}</attribute>
+            </xpath>
+            <xpath expr="//group[@name='main_info']" position="attributes">
+                <attribute name="attrs">{'invisible':[('licence_status','!=','confirmed_token')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='client_id']" position="replace" />
+            <xpath expr="//field[@name='client_secret']" position="replace" />
+            <xpath expr="//field[@name='anaf_oauth_url']" position="replace" />
+            <xpath expr="//field[@name='anaf_callback_url']" position="replace" />
+            <xpath expr="//field[@name='code']" position="replace" />
+            <xpath expr="//field[@name='access_token']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='refresh_token']" position="attributes" >
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='client_token_valability']" position="replace" />
+            <xpath expr="//field[@name='last_request_datetime']" position="replace" />
+            <xpath expr="//div[@class='oe_chatter']" position="replace" />
+            <xpath expr="//group[@name='token']" position="inside">
+                <field name="provider_id" options="{'no_quick_create': True, 'no_create_edit' : True}" />
+                <field name="provider_licence" invisible="1" />
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button
+          name="get_anaf_licence"
+          type="object"
+          class="btn btn-primary"
+          attrs="{'invisible': [('licence_status', '!=', 'draft')]}"
+          string="Get ANAF Licence"
+        />
+                <field
+          name="licence_status"
+          widget="statusbar"
+          statusbar_visible="draft,waiting_licence,confirmed_licence,confirmed_token"
+        />
+            </xpath>
+            <xpath expr="//header" position="after">
+                <div
+          class="alert alert-info"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('licence_status', '!=', 'draft')]}"
+        >
+                     <div
+          >Pentru a începe comunicarea cu ANAF, solicitați o licență furnizorului dvs de servicii, accesând butonul "Get ANAF Licence".</div>
+                </div>
+                <div
+          class="alert alert-info"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('licence_status', '!=', 'waiting_licence')]}"
+        >
+                     <div
+          >Solicitarea pentru licență a fost trimisă! Vă rugăm așteptați confirmarea furnizorului pentru următorii pași.</div>
+                </div>
+                <div
+          class="alert alert-info"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('licence_status', '!=', 'confirmed_licence')]}"
+        >
+                     <div
+          >Licența a fost confirmată! Pentru autentificare în platforma ANAF accesați butonul "Get Token From Anaf Website".<br
+            />IMPORTANT: Pentru autentificare este necesar să aveți stickul cu tokenul conectat la USB!</div>
+                </div>
+                <div
+          class="alert alert-success"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('licence_status', '!=', 'confirmed_token')]}"
+        >
+                     <div
+          >Felicitări! Autentificarea a fost realizată cu success. Acum puteți trimite facturi în platforma ANAF!</div>
+                </div>
+                <div
+          class="alert alert-danger"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('licence_status', '!=', 'blocked')]}"
+        >
+                     <div
+          >Accesul la platforma ANAF a fost restrictionat! Pentru mai multe detalii contactați furnizorul dvs de servicii!</div>
+                </div>
+                <div
+          class="alert alert-danger"
+          role="alert"
+          style="margin-bottom:0px;"
+          attrs="{'invisible': [('err_message','in',['', False])]}"
+        >
+                     <div><field name="err_message" class="oe_inline" /></div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem
+    id="menu_account_anaf_sync"
+    parent="account.account_account_menu"
+    name="Configurare e-Factura"
+    sequence="99"
+    action="l10n_ro_account_anaf_sync.action_account_anaf_sync"
+    groups="account.group_account_manager"
+  />
+
+    <record id="l10n_ro_account_anaf_sync_provider_form" model="ir.ui.view">
+        <field name="name">l10n.ro.account.anaf.sync.provider Form</field>
+        <field name="model">l10n.ro.account.anaf.sync.provider</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="name" />
+                    </group>
+                    <group>
+                        <field name="url" />
+                    </group>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="l10n_ro_account_anaf_sync_provider_tree" model="ir.ui.view">
+        <field name="name">l10n.ro.account.anaf.sync.provider Tree</field>
+        <field name="model">l10n.ro.account.anaf.sync.provider</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="url" />
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="l10n_ro_account_anaf_sync_provider_action" model="ir.actions.act_window">
+        <field name="name">Partner Anaf Provider</field>
+        <field name="res_model">l10n.ro.account.anaf.sync.provider</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+    id="menu_l10n_ro_account_anaf_sync_provider"
+    parent="account.account_account_menu"
+    name="Configurare Furnizor Anaf"
+    sequence="100"
+    action="l10n_ro_account_anaf_sync_provider_action"
+    groups="account.group_account_manager"
+  />
+
+</odoo>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="partner_licence_anaf_oauth_form" model="ir.ui.view">
+                <field name="name">partner.licence.anaf_oauth Form</field>
+                <field name="model">partner.licence.anaf_oauth</field>
+                <field name="type">form</field>
+                <field name="arch" type="xml">
+                    <form string="Form partner.licence.anaf_oauth">
+                        <sheet>
+		                    <div>
+		                        <label for="name" />
+		                        <h1>
+		                            <field name="name" />
+		                        </h1>
+		                    </div>
+                            <group>
+                                <group string="Anaf Oauth">
+                                    <field name="anaf_oauth_url" />
+                                    <field name="anaf_callback_url" />
+                                </group>
+                                <group string="Anaf Credentials">
+                                    <field name="client_id" />
+                                    <field name="client_secret" />
+                                    <field name="last_request_datetime" readonly="1" />
+                                </group>
+                            </group>
+                            <notebook>
+                            	<page string="Licences">
+                            		<field name="licence_ids" />
+                            	</page>
+                            </notebook>
+                        </sheet>
+                    </form>
+                </field>
+        </record>
+
+        <record id="partner_licence_anaf_oauth_tree" model="ir.ui.view">
+            <field name="name">partner.licence.anaf_oauth Tree</field>
+            <field name="model">partner.licence.anaf_oauth</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="client_id" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="partner_licence_anaf_oauth_action" model="ir.actions.act_window">
+            <field name="name">Anaf Conf OAuth</field>
+            <field name="res_model">partner.licence.anaf_oauth</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem
+    name="ANAF config Sync"
+    id="partner_licence_anaf_oauth_menu"
+    sequence="60"
+    parent="partner_licence.res_partner_licence_menu_root"
+    action="partner_licence_anaf_oauth_action"
+  />
+
+</odoo>

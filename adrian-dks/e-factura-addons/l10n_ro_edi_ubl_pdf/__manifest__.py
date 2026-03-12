@@ -1,0 +1,17 @@
+# -*- coding: utf-8 -*-
+{
+  'name':'E-factura Render PDF',
+  'description': "",
+  'version':'16.0.0.1',
+  'author':'Dakai SOFT',
+  'website': 'https://dakai.ro',
+  'author': 'Dakai SOFT SRL',
+  'maintainers': ["adrian-dks"],
+  'license': 'OPL-1',
+  'installable': True,
+  'data': [
+    #'security/ir.model.access.csv',
+    ],
+  'category': 'Account',
+  'depends': ['l10n_ro_account_edi_ubl'],
+}

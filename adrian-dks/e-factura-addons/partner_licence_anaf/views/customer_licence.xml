@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="res_partner_licence_form" model="ir.ui.view">
+                <field name="name">res.partner.licence Form</field>
+                <field name="model">res.partner.licence</field>
+                <field name="type">form</field>
+                <field name="inherit_id" ref="partner_licence.res_partner_licence_form" />
+                <field name="arch" type="xml">
+                    <xpath expr="//header/field" position="before">
+                        <field name="anaf_env" invisible="1" />
+                        <button
+          string="Set Production Env"
+          class="btn btn-primary"
+          name="setAnafEnvProduction"
+          type="object"
+          attrs="{'invisible':[('anaf_env','=','production'),('state','=','open')]}"
+        />
+                        <button
+          string="Set Test Env"
+          class="btn btn-primary"
+          name="setAnafEnvTest"
+          type="object"
+          attrs="{'invisible':[('anaf_env','=','test'),('state','=','open')]}"
+        />
+                    </xpath>
+                </field>
+        </record>
+
+</odoo>

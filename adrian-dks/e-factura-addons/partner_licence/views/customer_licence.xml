@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="res_partner_licence_form" model="ir.ui.view">
+                <field name="name">res.partner.licence Form</field>
+                <field name="model">res.partner.licence</field>
+                <field name="type">form</field>
+                <field name="arch" type="xml">
+                    <form string="Form res.partner.licence">
+                    	<header>
+                    		<field name="state" widget="statusbar" options="{'clickable': True}" />
+                    	</header>
+                        <sheet>
+		                    <div>
+		                        <label for="name" />
+		                        <h1>
+		                            <field name="name" />
+		                        </h1>
+		                    </div>
+                            <group>
+                                <group>
+                                    <field name="partner_id" />
+                                    <field name="vat" />
+                                </group>
+                                <group>
+                                    <field name="licence" readonly="1" />
+                                    <field name="database" readonly="1" />
+                                    <field name="url" readonly="1" />
+                                </group>
+                            </group>
+                        </sheet>
+                    </form>
+                </field>
+        </record>
+
+        <record id="res_partner_licence_tree" model="ir.ui.view">
+            <field name="name">res.partner.licence Tree</field>
+            <field name="model">res.partner.licence</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="partner_id" />
+                    <field name="scope" />
+                    <field name="licence" />
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+
+        <record id="res_partner_licence_action" model="ir.actions.act_window">
+            <field name="name">Customer Licences</field>
+            <field name="res_model">res.partner.licence</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem
+    name="Customer Licence"
+    id="res_partner_licence_menu_root"
+    sequence="30"
+    parent="sale.sale_menu_root"
+  />
+
+        <menuitem
+    name="Customer Licence"
+    id="res_partner_licence_menu"
+    sequence="30"
+    parent="res_partner_licence_menu_root"
+    action="res_partner_licence_action"
+  />
+
+</odoo>

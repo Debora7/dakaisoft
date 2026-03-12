@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+{
+  'name':'Smart Contract',
+  'description': "",
+  'version':'1.0.2',
+  'author':'Dakai SOFT',
+  'data': [
+    'security/contract_security.xml',
+    'security/ir.model.access.csv',
+    'data/data.xml',
+    'data/mail_template_data.xml',
+    'view/contract_contract.xml',
+    'view/sale.xml',
+    'view/contract_template.xml',
+    'view/contract_regulation.xml',
+    'view/doc_related.xml',
+    'view/execution.xml',
+    'view/template_doc_related.xml',
+    'view/contract_report.xml',
+    'view/res_partner_views.xml',
+  ],
+    'depends': ['base', 'sale','website'],
+    'category': 'Sales',
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+}

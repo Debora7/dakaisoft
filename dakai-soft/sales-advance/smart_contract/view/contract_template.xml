@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+       <record id="template_contract_form" model="ir.ui.view">
+            <field name="name">smart.contract.template.form</field>
+            <field name="model">smart.contract.template</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="id" invisible="1"/>
+                                <field name="name"/>
+                                <field name="company_id"/>
+                            </group>
+                            <group>
+                            	<field name="regulation_id"/>
+                                <field name="document_type" />
+	                            <field name="parent_id"
+	                                   invisible="document_type == 'contract'"
+	                                   domain="[('parent_id', '=', None)]" />
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Elements">
+                                <field name="elemente_ids" context="{'contract_id':id, 'type':'contract', 'element':None}"/>
+                            </page>
+                            <page string="Contract Addendums" invisible="document_type == 'act'">
+                                <field name="child_ids" />
+                            </page>
+                            <page string="Relations">
+                                <field name="related_object_ids"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+    </record>
+
+    <record id="contract_template_element_form" model="ir.ui.view">
+        <field name="name">smart.contract.template.element.form</field>
+        <field name="model">smart.contract.template.element</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="numar" />
+               				<field name="id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="parent_id" />
+                            <field name="tip" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content">
+                            <field name="text"/>
+                        </page>
+               			<page string="Atribute">
+               				<field name="attribute_ids"/>
+               			</page>
+                        <page string="Subelements" invisible="tip == 'alineat'">
+                            <field name="child_ids" context="{'contract_id':None, 'type':tip, 'element':id}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="template_contract_element_tree" model="ir.ui.view">
+        <field name="name">smart.contract.template.element Tree</field>
+        <field name="model">smart.contract.template.element</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="numar" />
+                <field name="tip" />
+            </list>
+        </field>
+    </record>
+
+    <record id="template_contract_tree" model="ir.ui.view">
+        <field name="name">smart.contract.template Tree</field>
+        <field name="model">smart.contract.template</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="regulation_id" />
+                <field name="parent_id" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_template_contract" model="ir.actions.act_window">
+        <field name="name">Contract Templates</field>
+        <field name="res_model">smart.contract.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

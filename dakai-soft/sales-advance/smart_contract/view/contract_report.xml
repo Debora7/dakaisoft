@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+	
+	<template id="smart_contract_base_html_template">
+		<t t-call="web.basic_layout">
+			<div class="page container" style="font-size:1em;line-height:1.4em;">
+				<div class="text-center font-weight-bold">
+					<h2>
+						<span t-if="o.document_type=='contract'">
+							Contract
+						</span>
+						<span t-if="o.document_type=='act'">
+							Contract Addendum
+						</span>
+						<t t-if="not o.nr_document">
+							DRAFT "<span t-field="o.name"/>" / <span t-field="o.create_date_only"/>
+						</t>
+						<t t-if="o.nr_document">
+							<span>Nr. <span t-field="o.nr_document"/></span>
+						</t>
+						<span data-oe-readonly="1" t-if="o.document_type=='act'">
+							to Contract
+							<t data-oe-readonly="1" t-if="not o.parent_id.nr_document">
+								DRAFT "<span t-esc="o.parent_id.name"/>" / <span t-esc="o.parent_id.create_date_only"/>
+							</t>
+							<t data-oe-readonly="1" t-if="o.parent_id.nr_document">
+								<span>Nr. <span t-esc="o.parent_id.nr_document"/></span>
+							</t>
+						</span>
+					</h2>
+				</div>
+				<div>
+					<t t-call="smart_contract.smart_contract_element_template">
+						<t t-set="elements" t-value="o.elemente_ids"/>
+					</t>
+				</div>
+				<div class="w-100" style="padding-left:20px;">
+					<p>Closed today <span t-field="o.signed_date"/> in 2 original copies, signed and stamped by the parties on each page.</p>
+				</div>
+				<div>
+				  <style>
+				    .font-weight-bold{
+				      font-weight:bold;
+				    }
+				  </style>
+					<div style="display:inline-block;width:100%;">
+						<div style="padding-left:20px;width:50%;float:left;">
+							<span class="font-weight-bold">Provider:</span><br/>
+							<span t-esc="res_company.name"/>
+						</div>
+						<div class="col text-right" style="text-align: right;width:50%;float:left;">
+							<span class="font-weight-bold">Client:</span><br/>
+							<span t-esc="o.partner_id.name"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</t>
+	</template>
+	
+	<template id="smart_contract_element_template">
+		<t t-set="elemente" t-value="elements"/>
+		<t t-foreach="elemente" t-as="elem">
+			<div style="padding-left:20px;">
+				<t t-if="elem.tip=='capitol'">
+					<div class="title" style="font-size: 16px;"> <b><span t-esc="elem.numar"/></b> <span t-esc="elem.name"/>
+						<t t-if="elem.cleartext">
+							<span t-field="elem.cleartext"/>
+						</t>
+					</div>
+				</t>
+				<t t-else="">
+					<div class="title" style="font-size: 16px;"> <b><span t-esc="elem.numar"/></b> <span t-esc="elem.name"/>
+						<span t-field="elem.cleartext"/>
+					</div>
+				</t>
+				<t t-if="elem.child_ids" style="font-size: 16px;">
+					<t t-call="smart_contract.smart_contract_element_template">
+						<t t-set="elements" t-value="elem.child_ids"/>
+					</t>
+				</t>
+			</div>
+		</t>
+	</template>
+	
+	<template id="smart_contract_web_report">
+	<!--Accesam webview din buton sau actiune de server!-->
+	</template>
+	
+	<template id="smart_contract_pdf_report">
+		<t t-foreach="docs" t-as="o">
+			<t t-call="smart_contract.smart_contract_base_html_template"/>
+		</t>
+	</template>
+
+	<record id="action_report_smart_contract" model="ir.actions.report">
+		<field name="name">Contract</field>
+		<field name="model">smart.contract</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">smart_contract.smart_contract_pdf_report</field>
+		<field name="report_file">smart_contract.smart_contract_pdf_report</field>
+		<field name="print_report_name">(object._get_report_base_filename())</field>
+		<field name="binding_model_id" ref="model_smart_contract"/>
+		<field name="binding_type">report</field>
+	</record>
+
+	<record id="action_report_sale_order_smart_contract" model="ir.actions.report">
+		<field name="name">Contract</field>
+		<field name="model">smart.contract</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">smart_contract.smart_contract_pdf_report</field>
+		<field name="report_file">smart_contract.smart_contract_pdf_report</field>
+		<field name="print_report_name">(object._get_report_base_filename())</field>
+		<field name="binding_model_id" ref="model_sale_order"/>
+		<field name="binding_type">report</field>
+	</record>
+
+</odoo>

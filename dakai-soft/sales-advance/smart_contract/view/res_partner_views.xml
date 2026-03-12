@@ -1,0 +1,18 @@
+<odoo>
+    <record id="res_partner_view_smart_contract" model="ir.ui.view">
+        <field name="name">res.partner.view.smart.contract</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="priority" eval="20"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" type="object"
+                        name="action_open_smart_contract"
+                        icon="fa-file" string="Documente juridice" invisible="smart_contract_count == 0">
+                    <field name="smart_contract_count" widget="statinfo" string="Documente juridice"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,15 @@
+<odoo>
+
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">Res Partner</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="get_partner_data" type="object" class="btn btn-primary" string="Get Partner Data"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

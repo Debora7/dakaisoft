@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+	<record id="contract_doc_related_form" model="ir.ui.view">
+		<field name="name">Contract Doc Execution Form</field>
+        <field name="model">smart.contract.execution</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+        <form>
+        	<sheet>
+        		<group>
+        			<group>
+        				<field name="name"/>
+        			</group>
+        			<group>
+        				<field name="res_model" readonly="1"/>
+        				<field name="res_id" readonly="1"/>
+        			</group>
+        		</group>
+        	</sheet>
+       	</form>
+        </field>
+	</record>
+	
+	<record id="contract_doc_related_tree" model="ir.ui.view">
+		<field name="name">Contract Doc Execution Tree</field>
+        <field name="model">smart.contract.execution</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+        	<list>
+        		<field name="name"/>
+        		<field name="res_model"/>
+        		<field name="res_id"/>
+        	</list>
+        </field>
+    </record>
+</odoo>

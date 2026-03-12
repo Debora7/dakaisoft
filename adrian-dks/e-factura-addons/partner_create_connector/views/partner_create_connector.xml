@@ -1,0 +1,127 @@
+<odoo>
+
+    <record id="partner_create_container_tree" model="ir.ui.view">
+        <field name="name">Partner Create Container</field>
+        <field name="model">partner.create.container</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="connector_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="partner_create_container_form" model="ir.ui.view">
+        <field name="name">Partner Create Container</field>
+        <field name="model">partner.create.container</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="API Connectors">
+                            <field name="connector_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="partner_create_connector_tree" model="ir.ui.view">
+        <field name="name">Partner Create Connector</field>
+        <field name="model">partner.create.connector</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" required="1"/>
+                <field name="endpoint"/>
+                <field name="method"/>
+                <field name="is_active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="partner_create_connector_form" model="ir.ui.view">
+        <field name="name">Partner Create Connector</field>
+        <field name="model">partner.create.connector</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="prefetch_mapping_data" type="object" class="btn btn-primary" string="Generate API Mappings"/>
+                    <button name="make_request" type="object" class="btn btn-primary" string="Test API Mappings"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="model"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group>
+                            <field name="endpoint"/>
+                            <field name="method"/>
+                            <field name="timeout"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Headers">
+                            <field name="header_ids">
+                                <tree editable="bottom">
+                                    <field name="key"/>
+                                    <field name="value"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Mappings">
+                            <field name="mapping_ids">
+                                <tree editable="bottom">
+                                    <field name="api_key"/>
+                                    <field name="odoo_key"/>
+                                    <field name="m2o_force_search"/>
+                                    <field name="model_to_search" attrs="{'invisible': [('m2o_force_search', '!=', True)]}"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="partner_create_connector_action" model="ir.actions.act_window">
+        <field name="name">Partner Create Connector</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">partner.create.connector</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="partner_create_connector_tree"/>
+    </record>
+
+    <record id="partner_create_container_action" model="ir.actions.act_window">
+        <field name="name">Partner Create Container</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">partner.create.container</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="partner_create_container_tree"/>
+    </record>
+
+    <menuitem name="Create Partner API Container"
+              id="partner_create_container_menu"
+              sequence="20"
+              parent="contacts.res_partner_menu_config"
+              action="partner_create_container_action"/>
+
+    <menuitem name="Create Partner API"
+              id="partner_create_connector_menu"
+              sequence="25"
+              parent="contacts.res_partner_menu_config"
+              action="partner_create_connector_action"/>
+
+</odoo>

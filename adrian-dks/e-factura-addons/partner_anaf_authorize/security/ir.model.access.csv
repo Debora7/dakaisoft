@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_l10n_ro_account_anaf_sync_provider_user,l10n.ro.account.anaf.sync.provider.user,model_l10n_ro_account_anaf_sync_provider,account.group_account_user,1,0,0,0
+access_l10n_ro_account_anaf_sync_provider_invoice,l10n.ro.account.anaf.sync.provider.invoice,model_l10n_ro_account_anaf_sync_provider,account.group_account_invoice,1,0,0,0
+access_l10n_ro_account_anaf_sync_provider_manager,l10n.ro.account.anaf.sync.provider.manager,model_l10n_ro_account_anaf_sync_provider,account.group_account_manager,1,1,1,1
